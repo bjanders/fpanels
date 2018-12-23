@@ -4,6 +4,8 @@ import (
 	"fmt"
         "log"
 	"time"
+	"math"
+	"errors"
 
         "github.com/google/gousb"
 //        "github.com/google/gousb/usbid"
@@ -26,18 +28,63 @@ type RadioPanel struct {
 	DisplayState [20]byte
 }
 
-//func (self *RadioPanel) SetDisplay(display int, n float32, decimals int) {
-//}
+func (self *RadioPanel) DisplayInteger(display int, n int) error {
+	return self.DisplayFloat(display, float32(n), 0)
+}
 
-func (self *RadioPanel) WriteDisplay(data []byte) {
-	self.Device.Control(0x21, 0x09, 0x03, 0x00, data[0:20])
+func (self *RadioPanel) DisplayFloat(display int, n float32, decimals int) error {
+	neg := false
+
+	if decimals < 0 || decimals > 5 {
+		return errors.New("decimals out of range")
+	}
+	tempN := int(n * float32(math.Pow10(decimals)))
+	if tempN < 0 {
+		tempN  = -tempN
+		neg = true
+	}
+	if display < 0 || display > 3 {
+		return errors.New("display number out of range")
+	}
+	if tempN < -9999 ||  tempN > 99999 {
+		return errors.New("value to be displayed out of range")
+	}
+
+	for digit := 0; digit < 5; digit++ {
+		var v int
+		pow := int(math.Pow10(digit))
+		if pow > tempN {
+			if neg {
+				v = 0xef
+				neg = false
+			} else {
+				v = 0xff
+			}
+		} else {
+			v = (tempN /pow) % 10
+			if decimals != 0 && digit == decimals {
+				v |= 0xd0
+			}
+		}
+		i := display * 5 + 4 -  digit
+		self.DisplayState[i] = byte(v)
+	}
+	self.UpdateDisplay()
+	return nil
+}
+
+func (self *RadioPanel) UpdateDisplay() {
+	//fmt.Printf("%20x ", self.DisplayState)
+	self.Device.Control(0x21, 0x09, 0x03, 0x00, self.DisplayState[0:20])
 }
 
 func NewRadioPanel(dev *gousb.Device) *RadioPanel {
-	var data [20]byte
 	panel := RadioPanel{}
+	for i := 0; i < 20; i++ {
+		panel.DisplayState[i] = 0x0f
+	}
 	panel.Device = dev
-	panel.WriteDisplay(data[:])
+	panel.UpdateDisplay()
 	return &panel
 }
 
@@ -95,19 +142,28 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not open a device: %v", err)
 	}
+	defer dev.Close()
 	dev.SetAutoDetach(true)
-	intf, done, err := dev.DefaultInterface()
-	if err != nil {
-		log.Fatalf("%s.DefaultInterface(): %v", dev, err)
-	}
-	defer done()
+//	intf, done, err := dev.DefaultInterface()
+//	if err != nil {
+//		log.Fatalf("%s.DefaultInterface(): %v", dev, err)
+//	}
+//	defer done()
 
-	ep, err := intf.InEndpoint(1)
-	if err != nil {
-		log.Fatalf("%s.inEndpoint(): %v", intf, err)
-	}
-
+	//ep, err := intf.InEndpoint(1)
+	//if err != nil {
+//		log.Fatalf("%s.inEndpoint(): %v", intf, err)
+//	}
 	radioPanel := NewRadioPanel(dev)
+	time.Sleep(10 * time.Millisecond)
+	for i := -9999; i < 9999; i++ {
+		radioPanel.DisplayInteger(0, i)
+	}
+
+	//for i := 0; i < 99999; i++ {
+//		radioPanel.SetDisplay(0, float32(99999-i), 0)
+//		radioPanel.SetDisplay(1, float32(i), 0)
+	//}
 	//c1 := make(chan int)
 	//go write(dev, c1)
 	//go readStream(ep, c1)
@@ -115,5 +171,4 @@ func main() {
 	//d := <-c2
 	//fmt.Println(d)
 	//time.Sleep(10 * time.Second)
-
 }
