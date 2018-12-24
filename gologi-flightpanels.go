@@ -1,17 +1,18 @@
 package main
 
 import (
-//	"fmt"
-        "log"
-//	"time"
-	"math"
+	//	"fmt"
+	"log"
+	//	"time"
 	"errors"
+	"math"
 
-        "github.com/google/gousb"
-//        "github.com/google/gousb/usbid"
+	"github.com/google/gousb"
+	//        "github.com/google/gousb/usbid"
 )
 
 type Switch uint
+
 const (
 	COM1_1 Switch = iota
 	COM2_1
@@ -40,6 +41,7 @@ const (
 )
 
 type Display int
+
 const (
 	ACTIVE_1 Display = iota
 	STANDBY_1
@@ -47,15 +49,14 @@ const (
 	STANDBY_2
 )
 
-
 type RadioPanel struct {
-	ctx *gousb.Context
-	device *gousb.Device
-	intf *gousb.Interface
-	intfDone func()
-	inEndpoint  *gousb.InEndpoint
+	ctx          *gousb.Context
+	device       *gousb.Device
+	intf         *gousb.Interface
+	intfDone     func()
+	inEndpoint   *gousb.InEndpoint
 	displayState [20]byte
-	autoUpdate bool
+	autoUpdate   bool
 }
 
 func NewRadioPanel() (*RadioPanel, error) {
@@ -84,7 +85,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 	}
 
 	panel.inEndpoint, err = panel.intf.InEndpoint(1)
-        if err != nil {
+	if err != nil {
 		panel.Close()
 		return nil, err
 	}
@@ -119,13 +120,13 @@ func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) e
 	// we want to display
 	tempN := int(n * float32(math.Pow10(decimals)))
 	if tempN < 0 {
-		tempN  = -tempN
+		tempN = -tempN
 		neg = true
 	}
 	if display < 0 || display > 3 {
 		return errors.New("display number out of range")
 	}
-	if tempN < -9999 ||  tempN > 99999 {
+	if tempN < -9999 || tempN > 99999 {
 		return errors.New("value to be displayed out of range")
 	}
 
@@ -142,12 +143,12 @@ func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) e
 				v = 0xff
 			}
 		} else {
-			v = (tempN /pow) % 10
+			v = (tempN / pow) % 10
 			if decimals != 0 && digit == decimals {
 				v |= 0xd0
 			}
 		}
-		i := int(display) * 5 + 4 -  digit
+		i := int(display)*5 + 4 - digit
 		self.displayState[i] = byte(v)
 	}
 	if self.autoUpdate {
@@ -163,9 +164,10 @@ func (self *RadioPanel) UpdateDisplay() {
 		log.Printf("%v", err)
 	}
 }
+
 type SwitchState struct {
 	Switch Switch
-	Value uint
+	Value  uint
 }
 
 func (self *RadioPanel) WatchSwitches() chan SwitchState {
@@ -190,11 +192,11 @@ func readSwitches(ep *gousb.InEndpoint, c chan SwitchState) {
 		if err != nil {
 			log.Fatalf("Read error: %v", err)
 		}
-		newState = uint64(data[0]) | uint64(data[1]) << 8 |  uint64(data[2]) << 16
-		changed := state  ^ newState
+		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
+		changed := state ^ newState
 		state = newState
 		for i := COM1_1; i <= ENC2_CCW_2; i++ {
-			if (changed >> i) & 1 == 1 {
+			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
 				if val == 0 && i != ACT_1 && i != ACT_2 {
 					continue
@@ -219,15 +221,15 @@ func main() {
 		radioPanel.DisplayInt(STANDBY_1, int(switchState.Value))
 		radioPanel.UpdateDisplay()
 	}
-//	time.Sleep(10 * time.Millisecond)
-//	radioPanel.DisplayFloat(0, 0.1, 2)
-//	radioPanel.UpdateDisplay()
-//	for {
-//		t := time.Now()
-//		radioPanel.DisplayInteger(0, t.Hour())
-//		radioPanel.DisplayInteger(1, t.Minute())
-//		radioPanel.DisplayInteger(3, t.Second())
-//		radioPanel.UpdateDisplay()
-//		time.Sleep(1 * time.Second)
-//	}
+	//	time.Sleep(10 * time.Millisecond)
+	//	radioPanel.DisplayFloat(0, 0.1, 2)
+	//	radioPanel.UpdateDisplay()
+	//	for {
+	//		t := time.Now()
+	//		radioPanel.DisplayInteger(0, t.Hour())
+	//		radioPanel.DisplayInteger(1, t.Minute())
+	//		radioPanel.DisplayInteger(3, t.Second())
+	//		radioPanel.UpdateDisplay()
+	//		time.Sleep(1 * time.Second)
+	//	}
 }
