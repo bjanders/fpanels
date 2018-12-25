@@ -1,11 +1,29 @@
 package flightpanels
 
 import (
+	"sync"
 	"log"
 	"github.com/google/gousb"
 )
 
 type Switch uint
+
+const (
+	USB_VENDOR_PANEL = 0x06a3
+	USB_PRODUCT_RADIO = 0x0d05
+	USB_PRODUCT_MULTI = 0x0d06
+	USB_PRODUCT_SWITCH = 0x0d67
+)
+
+type Panel struct {
+	ctx          *gousb.Context
+	device       *gousb.Device
+	intf         *gousb.Interface
+	inEndpoint   *gousb.InEndpoint
+	displayMutex sync.Mutex
+	displayDirty bool
+	intfDone     func()
+}
 
 type SwitchState struct {
 	Switch Switch

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"math"
 	"time"
-	"sync"
 	"github.com/google/gousb"
 )
 
@@ -32,25 +31,14 @@ const (
 )
 
 
-//
-//type Display int
-//
-//const (
-//	ACTIVE_1 Display = iota
-//	STANDBY_1
-//	ACTIVE_2
-//	STANDBY_2
-//)
+const (
+	ROW_1 Display = iota
+	ROW_2
+)
 
 type MultiPanel struct {
-	ctx          *gousb.Context
-	device       *gousb.Device
-	intf         *gousb.Interface
-	intfDone     func()
-	inEndpoint   *gousb.InEndpoint
+	Panel
 	displayState [11]byte
-	displayMutex sync.Mutex
-	displayDirty bool
 }
 
 func NewMultiPanel() (*MultiPanel, error) {
@@ -60,8 +48,8 @@ func NewMultiPanel() (*MultiPanel, error) {
 		panel.displayState[i] = 0x0f
 	}
 	panel.ctx = gousb.NewContext()
-	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(0x06a3, 0x0d06)
-	if err != nil {
+	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_MULTI)
+	if panel.device == nil || err != nil {
 		panel.Close()
 		return nil, err
 	}
@@ -132,7 +120,7 @@ func (self *MultiPanel) DisplayFloat(display Display, n float32, decimals int) e
 		// FIX: Show leading zero
 		if pow > tempN {
 			if neg {
-				v = 0xef
+				v = 0xde
 				neg = false
 			} else {
 				v = 0xff

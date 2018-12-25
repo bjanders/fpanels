@@ -4,7 +4,6 @@ import (
 	"time"
 	"errors"
 	"math"
-	"sync"
 	"github.com/google/gousb"
 )
 
@@ -45,14 +44,8 @@ const (
 )
 
 type RadioPanel struct {
-	ctx          *gousb.Context
-	device       *gousb.Device
-	intf         *gousb.Interface
-	intfDone     func()
-	inEndpoint   *gousb.InEndpoint
+	Panel
 	displayState [20]byte
-	displayMutex sync.Mutex
-	displayDirty bool
 }
 
 func NewRadioPanel() (*RadioPanel, error) {
@@ -62,8 +55,8 @@ func NewRadioPanel() (*RadioPanel, error) {
 		panel.displayState[i] = 0x0f
 	}
 	panel.ctx = gousb.NewContext()
-	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(0x06a3, 0x0d05)
-	if err != nil {
+	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_RADIO)
+	if panel.device == nil || err != nil {
 		panel.Close()
 		return nil, err
 	}
@@ -177,35 +170,3 @@ func (self *RadioPanel) noZeroSwitch(s Switch) bool {
 	}
 	return true
 }
-
-//func readSwitches(ep *gousb.InEndpoint, c chan SwitchState) {
-//	var data [3]byte
-//	var state uint64
-//	var newState uint64
-//
-//	stream, err := ep.NewStream(3, 1)
-//	if err != nil {
-//		log.Fatalf("Could not create read stream: %v", err)
-//	}
-//	defer stream.Close()
-//
-//	for {
-//		_, err := stream.Read(data[:])
-//		if err != nil {
-//			log.Fatalf("Read error: %v", err)
-//		}
-//		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
-//		changed := state ^ newState
-//		state = newState
-//		for i := COM1_1; i <= ENC2_CCW_2; i++ {
-//			if (changed>>i)&1 == 1 {
-//				val := uint(state >> i & 1)
-//				// Only report zero values for ACT buttons
-//				if val == 0 && i != ACT_1 && i != ACT_2 {
-//					continue
-//				}
-//				c <- SwitchState{i, val}
-//			}
-//		}
-//	}
-//}
