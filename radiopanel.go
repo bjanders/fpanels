@@ -1,16 +1,12 @@
-package radiopanel
+package flightpanels
 
 import (
-	"log"
 	"time"
 	"errors"
 	"math"
 	"sync"
 	"github.com/google/gousb"
-	//        "github.com/google/gousb/usbid"
 )
-
-type Switch uint
 
 const (
 	COM1_1 Switch = iota
@@ -169,76 +165,47 @@ func (self *RadioPanel) refreshDisplay() {
 }
 
 
-type SwitchState struct {
-	Switch Switch
-	Value  uint
-}
-
 func (self *RadioPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
-	go readSwitches(self.inEndpoint, c)
+	go readSwitches(self, self.inEndpoint, c)
 	return c
 }
 
-func readSwitches(ep *gousb.InEndpoint, c chan SwitchState) {
-	var data [3]byte
-	var state uint64
-	var newState uint64
-
-	stream, err := ep.NewStream(3, 1)
-	if err != nil {
-		log.Fatalf("Could not create read stream: %v", err)
+func (self *RadioPanel) noZeroSwitch(s Switch) bool {
+	if s == ACT_1 || s == ACT_2 {
+		return false
 	}
-	defer stream.Close()
-
-	for {
-		_, err := stream.Read(data[:])
-		if err != nil {
-			log.Fatalf("Read error: %v", err)
-		}
-		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
-		changed := state ^ newState
-		state = newState
-		for i := COM1_1; i <= ENC2_CCW_2; i++ {
-			if (changed>>i)&1 == 1 {
-				val := uint(state >> i & 1)
-				// Only report zero values for ACT buttons
-				if val == 0 && i != ACT_1 && i != ACT_2 {
-					continue
-				}
-				c <- SwitchState{i, val}
-			}
-		}
-	}
+	return true
 }
 
-func main() {
-	radioPanel, err := NewRadioPanel()
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	defer radioPanel.Close()
-	for i := 0; i < 100000; i++ {
-		time.Sleep(100 * time.Microsecond)
-		radioPanel.DisplayInt(ACTIVE_1, i)
-	}
-	//c := radioPanel.WatchSwitches()
-	//for {
-//		switchState := <-c
-//		log.Printf("%d: %d", switchState.Switch, switchState.Value)
-//		radioPanel.DisplayInt(ACTIVE_1, int(switchState.Switch))
-//		radioPanel.DisplayInt(STANDBY_1, int(switchState.Value))
-//		//radioPanel.UpdateDisplay()
+//func readSwitches(ep *gousb.InEndpoint, c chan SwitchState) {
+//	var data [3]byte
+//	var state uint64
+//	var newState uint64
+//
+//	stream, err := ep.NewStream(3, 1)
+//	if err != nil {
+//		log.Fatalf("Could not create read stream: %v", err)
 //	}
-	//	time.Sleep(10 * time.Millisecond)
-	//	radioPanel.DisplayFloat(0, 0.1, 2)
-	//	radioPanel.UpdateDisplay()
-	//	for {
-	//		t := time.Now()
-	//		radioPanel.DisplayInteger(0, t.Hour())
-	//		radioPanel.DisplayInteger(1, t.Minute())
-	//		radioPanel.DisplayInteger(3, t.Second())
-	//		radioPanel.UpdateDisplay()
-	//		time.Sleep(1 * time.Second)
-	//	}
-}
+//	defer stream.Close()
+//
+//	for {
+//		_, err := stream.Read(data[:])
+//		if err != nil {
+//			log.Fatalf("Read error: %v", err)
+//		}
+//		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
+//		changed := state ^ newState
+//		state = newState
+//		for i := COM1_1; i <= ENC2_CCW_2; i++ {
+//			if (changed>>i)&1 == 1 {
+//				val := uint(state >> i & 1)
+//				// Only report zero values for ACT buttons
+//				if val == 0 && i != ACT_1 && i != ACT_2 {
+//					continue
+//				}
+//				c <- SwitchState{i, val}
+//			}
+//		}
+//	}
+//}
