@@ -1,0 +1,231 @@
+= fpanels
+Go library for interacting with Logitech/Saitek flight panels
+
+NOTE: This is work in progress. The code is useable, but not much tested. The API
+is likely to change. The library has only been tested on Linux so far.
+
+This python library provides codes for interfacing with the following Logitech devices:
+
+- Flight switch panel
+- Flight multi panel
+- Flight radio panel
+
+== The panels
+
+=== Flight switch panel
+
+The flight switch panel has:
+
+- A five position switch
+- Thirteen two position switches
+- A two position landing gear lever
+- Three red/green landing gear indicator LEDs 
+
+The USB vendor:product ID for the panel is 06a3:0d05.
+
+==== Landing gear LEDs
+
+The landing gear LEDs can be enabled by sending a one byte USB control message to the device as follows:
+
+----
+00000001 Green N
+00000010 Green L
+00000100 Green R
+00001000 Red N
+00010000 Red L
+00100000 Red R
+xx000000 Not used
+----
+
+Enabling both the red and green LED gives a yellow color.
+
+==== Switches
+
+The state of the switches can be obtained by a three byte USB bulk read on
+endpoint 1. The bits the bytes are as follows:
+
+----
+Byte 1
+00000001 BAT
+00000010 ALT
+00000100 AVIONICS
+00001000 FUEL
+00010000 DE-ICE
+00100000 PITOT
+01000000 COWL
+10000000 PANEL
+
+Byte 2
+00000001 BEACON
+00000010 NAV
+00000100 STROBE
+00001000 TAXI
+00010000 LANDING
+00100000 OFF
+01000000 R
+10000000 L
+
+Byte 3
+00000001 BOTH
+00000010 START
+00000100 GEAR UP 
+00001000 GEAR DOWN
+xxxx0000 Not used
+----
+
+=== Flight multi panel
+
+The flight multi panel has:
+
+- A five position switch
+- Eight push buttons with individually controlable backlight
+- A rotary encoder
+- A two position switch
+- A two position momentary switch
+- A pitch trim rotary encoder
+- A two row segment display with five numbers on each row
+
+The text on the left on the segment display is not controllable. The text 
+shows the function of the selection switch. When IAS, HDG or CRS is
+selected, then only three numbers can be shown on the top row and the
+bottom row is blank.
+
+When VS or ALT is selected, then both rows can show 5 numbers each. The 
+bottom row can additionally show dashes.
+
+The USB vendor:product ID for the panel 06a3:0d06.
+
+==== Segment display and button LEDs
+
+The segment display and button LEDs are controlled by sending an 11 byte USB
+control message to the device. The first five bytes are for the top row, the
+second five for the bottom row and the 11th byte controls the button LEDs.
+The Logitech software sends 12 bytes, but no function has been found for the 12th
+byte. The 12th byte is always sent as 0xff.
+
+The 10 numbers on the segment display are encoded as follows:
+
+----
+0000xxxx Binary encoded decimal (0x00 shows 0, 0x01 shows 1, etc.)
+00001111 Turns the number off
+11011110 Shows a dash on the bottom row (0xde)
+----
+
+If 0x0f is set for all 10 numbers then the display is turned off, including the
+text of the left of the numbers.
+
+Other values outside the range 0-9 will also turn off the number. The Logitech
+software uses 0x0f.
+
+The 11th byte for the push button LEDs are encoded as follows:
+
+----
+00000001 AP
+00000010 HDG
+00000100 NAV
+00001000 IAS
+00010000 ALT
+00100000 VS
+01000000 APR
+10000000 REV
+----
+
+==== Switches, buttons and encoders
+
+The state of the switches can be obtained by a three byte USB bulk read on
+endpont 1. The bits the bytes are as follows:
+
+----
+Byte 1
+00000001 ALT
+00000010 VS
+00000100 IAS
+00001000 HDG
+00010000 CRS
+00100000 Encoder cw
+01000000 Encoder ccw
+10000000 AP
+
+Byte 2
+00000001 HDG
+00000010 NAV
+00000100 IAS
+00001000 ALT
+00010000 APR
+00100000 REV
+01000000 
+10000000 Throttle ARM
+
+Byte 3
+00000001 Flaps up
+00000010 Flaps down
+00000100 Pitch down
+00001000 Pitch up
+xxxx0000 Not used
+----
+
+=== Flight radio panel
+
+The flight radio panel has:
+
+- Two seven position function switches
+- Two dual rotary encoders
+- Two momentary push buttons
+- Four five number segment displays
+
+The segment displays can show numbers or dash in each position. In addition
+a dot can be displayed in combination with a number.
+
+The vendor:prduct ID for the panel is 06a3:0d67.
+
+==== Segment displays
+
+The segment displays are controlled by sending a 20 byte USB
+control message to the device, 5 bytes per display, in the following order:
+top left, top right, bottom left, bottom right.
+
+The 20 display numbers are encoded as follows:
+
+----
+0000xxxx Binary encoded decimal (0x00 shows 0, 0x01 shows 1, etc.)
+00001111 Turns the number off
+1101xxxx Adds a dot to the number
+1110xxxx Shows dash/minus
+----
+
+==== Switches, buttons and encoders
+
+The state of the switches can be obtained by a three byte USB bulk read on
+endpoint 1. The bits in the bytes are as follows:
+
+----
+Byte 1
+00000001 1 COM1
+00000010 1 COM2
+00000100 1 NAV1
+00001000 1 NAV2
+00010000 1 ADF
+00100000 1 DME
+01000000 1 XPDR
+10000000 2 COM1
+
+Byte 2
+00000001 2 COM2
+00000010 2 NAV1
+00000100 2 NAV2
+00001000 2 ADF
+00010000 2 DME
+00100000 2 XPDR
+01000000 1 ACT/STDBY
+10000000 2 ACT/STDBY
+
+Byte 3
+00000001 1 inner encoder cw
+00000010 1 inner encoder ccw
+00000100 1 outer encoder cw
+00001000 1 outer encoder ccw
+00010000 2 inner encoder cw 
+00100000 2 inner encoder ccw
+01000000 2 outer encoder cw 
+10000000 2 outer encoder ccw
+----
