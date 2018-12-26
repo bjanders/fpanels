@@ -1,4 +1,4 @@
-package flightpanels
+package fpanels
 
 import (
 	"time"
@@ -57,6 +57,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	var err error
 	panel := SwitchPanel{}
 	panel.displayState[0] = 0
+	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_SWITCH)
 	if panel.device == nil || err != nil {

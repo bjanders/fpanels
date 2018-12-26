@@ -1,4 +1,4 @@
-package flightpanels
+package fpanels
 
 import (
 	"errors"
@@ -44,9 +44,10 @@ type MultiPanel struct {
 func NewMultiPanel() (*MultiPanel, error) {
 	var err error
 	panel := MultiPanel{}
-	for i := 0; i < 11; i++ {
+	for i := 0; i < len(panel.displayState); i++ {
 		panel.displayState[i] = 0x0f
 	}
+	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_MULTI)
 	if panel.device == nil || err != nil {

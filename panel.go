@@ -1,4 +1,4 @@
-package flightpanels
+package fpanels
 
 import (
 	"sync"

@@ -1,4 +1,4 @@
-package flightpanels
+package fpanels
 
 import (
 	"time"
@@ -51,9 +51,10 @@ type RadioPanel struct {
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < len(panel.displayState); i++ {
 		panel.displayState[i] = 0x0f
 	}
+	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_RADIO)
 	if panel.device == nil || err != nil {
@@ -144,6 +145,15 @@ func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) e
 	return nil
 }
 
+func (self *RadioPanel) DisplayOff() {
+	self.displayMutex.Lock()
+	for i := 0; i < len(self.displayState); i++ {
+		self.displayState[i] = 0xff
+	}
+	self.displayDirty = true
+	self.displayMutex.Unlock()
+
+}
 func (self *RadioPanel) refreshDisplay() {
 	for {
 		// refresh rate 20 Hz
