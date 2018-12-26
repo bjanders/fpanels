@@ -1,0 +1,10 @@
+= TODO list
+Things to fix and improve
+
+* Add a `DisplayString()` method for the radio and multi panels
+* Fix showing leading zero in the `DisplayInt()` and `DisplayFloat()` methods
+** Maybe convert to string with `Sprintf()` and then call `DisplayString()`
+* End display refresher and switch reader goroutines on panel `Close()`
+** Use `WaitGroup`
+* Use `sync.Cond` to wake display refresher only when necessary
+* Code documentation
