@@ -21,7 +21,7 @@ The flight switch panel has:
 - A two position landing gear lever
 - Three red/green landing gear indicator LEDs 
 
-The USB vendor:product ID for the panel is 06a3:0d05.
+The USB vendor:product ID for the panel is 06a3:0d67.
 
 ==== Landing gear LEDs
 
@@ -176,7 +176,7 @@ The flight radio panel has:
 The segment displays can show numbers or dash in each position. In addition
 a dot can be displayed in combination with a number.
 
-The vendor:prduct ID for the panel is 06a3:0d67.
+The vendor:prduct ID for the panel is 06a3:0d05.
 
 ==== Segment displays
 
