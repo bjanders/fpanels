@@ -1,8 +1,8 @@
 package fpanels
 
 import (
-	"time"
 	"github.com/google/gousb"
+	"time"
 )
 
 const (
@@ -29,28 +29,27 @@ const (
 )
 
 const (
-	GREEN_N byte = 1<<iota
+	GREEN_N byte = 1 << iota
 	GREEN_L
 	GREEN_R
 	RED_N
 	RED_L
 	RED_R
-	YELLOW_N = GREEN_N | RED_N
-	YELLOW_L = GREEN_L | RED_L
-	YELLOW_R = GREEN_R | RED_R
-	GREEN_ALL = GREEN_N | GREEN_L | GREEN_R
-	RED_ALL = RED_N | RED_L | RED_R
+	YELLOW_N   = GREEN_N | RED_N
+	YELLOW_L   = GREEN_L | RED_L
+	YELLOW_R   = GREEN_R | RED_R
+	GREEN_ALL  = GREEN_N | GREEN_L | GREEN_R
+	RED_ALL    = RED_N | RED_L | RED_R
 	YELLOW_ALL = YELLOW_N | YELLOW_L | YELLOW_R
-	GEAR_N = YELLOW_N
-	GEAR_L = YELLOW_L
-	GEAR_R = YELLOW_R
-	GEAR_ALL = YELLOW_ALL
+	GEAR_N     = YELLOW_N
+	GEAR_L     = YELLOW_L
+	GEAR_R     = YELLOW_R
+	GEAR_ALL   = YELLOW_ALL
 )
-
 
 type SwitchPanel struct {
 	Panel
-	displayState  [1]byte
+	displayState [1]byte
 }
 
 func NewSwitchPanel() (*SwitchPanel, error) {
@@ -128,8 +127,6 @@ func (self *SwitchPanel) refreshDisplay() {
 		self.displayMutex.Unlock()
 	}
 }
-
-
 
 func (self *SwitchPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)

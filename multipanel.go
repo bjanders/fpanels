@@ -2,9 +2,9 @@ package fpanels
 
 import (
 	"errors"
+	"github.com/google/gousb"
 	"math"
 	"time"
-	"github.com/google/gousb"
 )
 
 const (
@@ -29,7 +29,6 @@ const (
 	TRIM_DOWN
 	TRIM_UP
 )
-
 
 const (
 	ROW_1 Display = iota
@@ -151,8 +150,6 @@ func (self *MultiPanel) refreshDisplay() {
 	}
 }
 
-
-
 func (self *MultiPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
 	go readSwitches(self, self.inEndpoint, c)
@@ -163,7 +160,7 @@ func (self *MultiPanel) noZeroSwitch(s Switch) bool {
 	if s >= ALT && s <= ENC_CCW {
 		return true
 	}
-	if s == TRIM_DOWN || s == TRIM_UP  {
+	if s == TRIM_DOWN || s == TRIM_UP {
 		return true
 	}
 	return false

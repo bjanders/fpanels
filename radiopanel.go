@@ -1,10 +1,10 @@
 package fpanels
 
 import (
-	"time"
 	"errors"
-	"math"
 	"github.com/google/gousb"
+	"math"
+	"time"
 )
 
 const (
@@ -166,7 +166,6 @@ func (self *RadioPanel) refreshDisplay() {
 		self.displayMutex.Unlock()
 	}
 }
-
 
 func (self *RadioPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)

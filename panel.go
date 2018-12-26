@@ -1,17 +1,17 @@
 package fpanels
 
 import (
-	"sync"
-	"log"
 	"github.com/google/gousb"
+	"log"
+	"sync"
 )
 
 type Switch uint
 
 const (
-	USB_VENDOR_PANEL = 0x06a3
-	USB_PRODUCT_RADIO = 0x0d05
-	USB_PRODUCT_MULTI = 0x0d06
+	USB_VENDOR_PANEL   = 0x06a3
+	USB_PRODUCT_RADIO  = 0x0d05
+	USB_PRODUCT_MULTI  = 0x0d06
 	USB_PRODUCT_SWITCH = 0x0d67
 )
 
@@ -34,7 +34,6 @@ type PanelReader interface {
 	noZeroSwitch(i Switch) bool
 }
 
-
 func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan SwitchState) {
 	var data [3]byte
 	var state uint64
@@ -54,7 +53,7 @@ func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan Switch
 		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
 		changed := state ^ newState
 		state = newState
-		for i := Switch(0); i < 24 ; i++ {
+		for i := Switch(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
 				if val == 0 && panel.noZeroSwitch(i) {
