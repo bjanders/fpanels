@@ -4,7 +4,8 @@ Go library for interacting with Logitech/Saitek flight panels
 NOTE: This is work in progress. The code is useable, but not much tested. The API
 is likely to change. The library has only been tested on Linux so far.
 
-This python library provides codes for interfacing with the following Logitech devices:
+This python library provides codes for interfacing with the following
+Logitech/Saitek devices:
 
 - Flight switch panel
 - Flight multi panel
