@@ -51,7 +51,7 @@ type RadioPanel struct {
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
-	for i := 0; i < len(panel.displayState); i++ {
+	for i := range panel.displayState {
 		panel.displayState[i] = 0x0f
 	}
 	panel.displayDirty = true

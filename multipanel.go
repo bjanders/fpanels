@@ -43,7 +43,7 @@ type MultiPanel struct {
 func NewMultiPanel() (*MultiPanel, error) {
 	var err error
 	panel := MultiPanel{}
-	for i := 0; i < len(panel.displayState); i++ {
+	for i := range panel.displayState {
 		panel.displayState[i] = 0x0f
 	}
 	panel.displayDirty = true
