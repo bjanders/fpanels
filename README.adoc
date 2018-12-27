@@ -1,4 +1,5 @@
 image:https://travis-ci.com/bjanders/fpanels.svg?branch=master["Build Status", link="https://travis-ci.com/bjanders/fpanels"]
+image:https://goreportcard.com/badge/github.com/bjanders/fpanels["Go Report Card", link="https://goreportcard.com/report/github.com/bjanders/fpanels"]
 
 = fpanels
 Go library for interacting with Logitech/Saitek flight panels
