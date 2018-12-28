@@ -80,26 +80,26 @@ func NewRadioPanel() (*RadioPanel, error) {
 	return &panel, nil
 }
 
-func (self *RadioPanel) Close() {
+func (panel *RadioPanel) Close() {
 	// FIX: Stop threads
-	if self.intfDone != nil {
-		self.intfDone()
+	if panel.intfDone != nil {
+		panel.intfDone()
 	}
-	if self.device != nil {
-		self.device.Close()
+	if panel.device != nil {
+		panel.device.Close()
 	}
-	if self.ctx != nil {
-		self.ctx.Close()
+	if panel.ctx != nil {
+		panel.ctx.Close()
 	}
 }
 
 // FIX: Add DisplayString() function
 
-func (self *RadioPanel) DisplayInt(display Display, n int) error {
-	return self.DisplayFloat(display, float32(n), 0)
+func (panel *RadioPanel) DisplayInt(display Display, n int) error {
+	return panel.DisplayFloat(display, float32(n), 0)
 }
 
-func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) error {
+func (panel *RadioPanel) DisplayFloat(display Display, n float32, decimals int) error {
 	neg := false
 
 	if decimals < 0 || decimals > 5 {
@@ -118,9 +118,9 @@ func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) e
 	if tempN < -9999 || tempN > 99999 {
 		return errors.New("value to be displayed out of range")
 	}
-	self.displayMutex.Lock()
-	defer self.displayMutex.Unlock()
-	self.displayDirty = true
+	panel.displayMutex.Lock()
+	defer panel.displayMutex.Unlock()
+	panel.displayDirty = true
 	for digit := 0; digit < 5; digit++ {
 		var v int
 		// Get the number we want to display in the 10s
@@ -140,40 +140,40 @@ func (self *RadioPanel) DisplayFloat(display Display, n float32, decimals int) e
 			}
 		}
 		i := int(display)*5 + 4 - digit
-		self.displayState[i] = byte(v)
+		panel.displayState[i] = byte(v)
 	}
 	return nil
 }
 
-func (self *RadioPanel) DisplayOff() {
-	self.displayMutex.Lock()
-	for i := 0; i < len(self.displayState); i++ {
-		self.displayState[i] = 0xff
+func (panel *RadioPanel) DisplayOff() {
+	panel.displayMutex.Lock()
+	for i := 0; i < len(panel.displayState); i++ {
+		panel.displayState[i] = 0xff
 	}
-	self.displayDirty = true
-	self.displayMutex.Unlock()
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
 
 }
-func (self *RadioPanel) refreshDisplay() {
+func (panel *RadioPanel) refreshDisplay() {
 	for {
 		// refresh rate 20 Hz
 		time.Sleep(50 * time.Millisecond)
-		self.displayMutex.Lock()
-		if self.displayDirty {
-			self.device.Control(0x21, 0x09, 0x03, 0x00, self.displayState[0:20])
-			self.displayDirty = false
+		panel.displayMutex.Lock()
+		if panel.displayDirty {
+			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[0:20])
+			panel.displayDirty = false
 		}
-		self.displayMutex.Unlock()
+		panel.displayMutex.Unlock()
 	}
 }
 
-func (self *RadioPanel) WatchSwitches() chan SwitchState {
+func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
-	go readSwitches(self, self.inEndpoint, c)
+	go readSwitches(panel, panel.inEndpoint, c)
 	return c
 }
 
-func (self *RadioPanel) noZeroSwitch(s Switch) bool {
+func (panel *RadioPanel) noZeroSwitch(s Switch) bool {
 	if s == ACT_1 || s == ACT_2 {
 		return false
 	}

@@ -72,26 +72,26 @@ func NewMultiPanel() (*MultiPanel, error) {
 	return &panel, nil
 }
 
-func (self *MultiPanel) Close() {
+func (panel *MultiPanel) Close() {
 	// FIX: Stop threads
-	if self.intfDone != nil {
-		self.intfDone()
+	if panel.intfDone != nil {
+		panel.intfDone()
 	}
-	if self.device != nil {
-		self.device.Close()
+	if panel.device != nil {
+		panel.device.Close()
 	}
-	if self.ctx != nil {
-		self.ctx.Close()
+	if panel.ctx != nil {
+		panel.ctx.Close()
 	}
 }
 
 // FIX: Add DisplayString() function
 
-func (self *MultiPanel) DisplayInt(display Display, n int) error {
-	return self.DisplayFloat(display, float32(n), 0)
+func (panel *MultiPanel) DisplayInt(display Display, n int) error {
+	return panel.DisplayFloat(display, float32(n), 0)
 }
 
-func (self *MultiPanel) DisplayFloat(display Display, n float32, decimals int) error {
+func (panel *MultiPanel) DisplayFloat(display Display, n float32, decimals int) error {
 	neg := false
 
 	if decimals < 0 || decimals > 5 {
@@ -110,9 +110,9 @@ func (self *MultiPanel) DisplayFloat(display Display, n float32, decimals int) e
 	if tempN < -9999 || tempN > 99999 {
 		return errors.New("value to be displayed out of range")
 	}
-	self.displayMutex.Lock()
-	defer self.displayMutex.Unlock()
-	self.displayDirty = true
+	panel.displayMutex.Lock()
+	defer panel.displayMutex.Unlock()
+	panel.displayDirty = true
 	for digit := 0; digit < 5; digit++ {
 		var v int
 		// Get the number we want to display in the 10s
@@ -132,31 +132,31 @@ func (self *MultiPanel) DisplayFloat(display Display, n float32, decimals int) e
 			}
 		}
 		i := int(display)*5 + 4 - digit
-		self.displayState[i] = byte(v)
+		panel.displayState[i] = byte(v)
 	}
 	return nil
 }
 
-func (self *MultiPanel) refreshDisplay() {
+func (panel *MultiPanel) refreshDisplay() {
 	for {
 		// refresh rate 20 Hz
 		time.Sleep(50 * time.Millisecond)
-		self.displayMutex.Lock()
-		if self.displayDirty {
-			self.device.Control(0x21, 0x09, 0x03, 0x00, self.displayState[0:11])
-			self.displayDirty = false
+		panel.displayMutex.Lock()
+		if panel.displayDirty {
+			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[0:11])
+			panel.displayDirty = false
 		}
-		self.displayMutex.Unlock()
+		panel.displayMutex.Unlock()
 	}
 }
 
-func (self *MultiPanel) WatchSwitches() chan SwitchState {
+func (panel *MultiPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
-	go readSwitches(self, self.inEndpoint, c)
+	go readSwitches(panel, panel.inEndpoint, c)
 	return c
 }
 
-func (self *MultiPanel) noZeroSwitch(s Switch) bool {
+func (panel *MultiPanel) noZeroSwitch(s Switch) bool {
 	if s >= ALT && s <= ENC_CCW {
 		return true
 	}

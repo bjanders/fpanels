@@ -81,60 +81,60 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	return &panel, nil
 }
 
-func (self *SwitchPanel) Close() {
+func (panel *SwitchPanel) Close() {
 	// FIX: Stop threads
-	if self.intfDone != nil {
-		self.intfDone()
+	if panel.intfDone != nil {
+		panel.intfDone()
 	}
-	if self.device != nil {
-		self.device.Close()
+	if panel.device != nil {
+		panel.device.Close()
 	}
-	if self.ctx != nil {
-		self.ctx.Close()
+	if panel.ctx != nil {
+		panel.ctx.Close()
 	}
 }
 
-func (self *SwitchPanel) SetGear(s byte) {
-	self.displayMutex.Lock()
-	self.displayState[0] = s
-	self.displayDirty = true
-	self.displayMutex.Unlock()
+func (panel *SwitchPanel) SetGear(s byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[0] = s
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
 }
 
-func (self *SwitchPanel) SetGearOn(s byte) {
-	self.displayMutex.Lock()
-	self.displayState[0] = self.displayState[0] | s
-	self.displayDirty = true
-	self.displayMutex.Unlock()
+func (panel *SwitchPanel) SetGearOn(s byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[0] = panel.displayState[0] | s
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
 }
 
-func (self *SwitchPanel) SetGearOff(s byte) {
-	self.displayMutex.Lock()
-	self.displayState[0] = self.displayState[0] & ^s
-	self.displayDirty = true
-	self.displayMutex.Unlock()
+func (panel *SwitchPanel) SetGearOff(s byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[0] = panel.displayState[0] & ^s
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
 }
 
-func (self *SwitchPanel) refreshDisplay() {
+func (panel *SwitchPanel) refreshDisplay() {
 	for {
 		// refresh rate 20 Hz
 		time.Sleep(50 * time.Millisecond)
-		self.displayMutex.Lock()
-		if self.displayDirty {
-			self.device.Control(0x21, 0x09, 0x03, 0x00, self.displayState[:])
-			self.displayDirty = false
+		panel.displayMutex.Lock()
+		if panel.displayDirty {
+			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[:])
+			panel.displayDirty = false
 		}
-		self.displayMutex.Unlock()
+		panel.displayMutex.Unlock()
 	}
 }
 
-func (self *SwitchPanel) WatchSwitches() chan SwitchState {
+func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
-	go readSwitches(self, self.inEndpoint, c)
+	go readSwitches(panel, panel.inEndpoint, c)
 	return c
 }
 
-func (self *SwitchPanel) noZeroSwitch(s Switch) bool {
+func (panel *SwitchPanel) noZeroSwitch(s Switch) bool {
 	if s >= ENG_OFF && s <= ENG_START {
 		return true
 	}
