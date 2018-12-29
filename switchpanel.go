@@ -94,6 +94,14 @@ func (panel *SwitchPanel) Close() {
 	}
 }
 
+func (panel *SwitchPanel) setSwitches(s PanelSwitches) {
+	panel.Switches = s
+}
+
+func (panel *SwitchPanel) IsSwitchSet(id SwitchId) bool {
+	return panel.Switches.IsSet(id)
+}
+
 func (panel *SwitchPanel) SetGear(s byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = s

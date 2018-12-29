@@ -4,6 +4,7 @@ import (
 	"github.com/bjanders/fpanels"
 	"log"
 	"time"
+	"fmt"
 )
 
 func main() {
@@ -25,6 +26,8 @@ func main() {
 	for i := -1000; i < 1000; i++ {
 		time.Sleep(1000 * time.Microsecond)
 		radioPanel.DisplayInt(fpanels.ACTIVE_1, i)
+		s := fmt.Sprintf("%d", i)
+		radioPanel.DisplayString(fpanels.ACTIVE_2, s)
 		multiPanel.DisplayInt(fpanels.ROW_1, i)
 	}
 	switchPanel.SetGear(fpanels.RED_N | fpanels.RED_L | fpanels.GREEN_R)

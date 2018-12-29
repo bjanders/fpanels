@@ -85,6 +85,14 @@ func (panel *MultiPanel) Close() {
 	}
 }
 
+func (panel *MultiPanel) setSwitches(s PanelSwitches) {
+	panel.Switches = s
+}
+
+func (panel *MultiPanel) IsSwitchSet(id SwitchId) bool {
+	return panel.Switches.IsSet(id)
+}
+
 // FIX: Add DisplayString() function
 
 func (panel *MultiPanel) DisplayInt(display DisplayId, n int) error {

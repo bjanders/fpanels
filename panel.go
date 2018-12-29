@@ -18,7 +18,7 @@ const (
 type PanelId int
 
 const (
-	RADIO PanelId =  iota
+	RADIO PanelId = iota
 	MULTI
 	SWITCH
 )
@@ -29,6 +29,7 @@ type Panel struct {
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
 	displayMutex sync.Mutex
+	Switches     PanelSwitches
 	displayDirty bool
 	intfDone     func()
 }
@@ -38,16 +39,23 @@ type SwitchState struct {
 	Value  uint
 }
 
+type PanelSwitches uint32
+
 type DisplayId uint
 
-type PanelReader interface {
+type SwitchingPanel interface {
+	setSwitches(s PanelSwitches)
 	noZeroSwitch(i SwitchId) bool
 }
 
-func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan SwitchState) {
+func (switches PanelSwitches) IsSet(id SwitchId) bool {
+	return uint32(switches)&1<<uint32(id) != 0
+}
+
+func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan SwitchState) {
 	var data [3]byte
-	var state uint64
-	var newState uint64
+	var state uint32
+	var newState uint32
 
 	stream, err := inEndpoint.NewStream(3, 1)
 	if err != nil {
@@ -60,9 +68,10 @@ func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan Switch
 		if err != nil {
 			log.Fatalf("Read error: %v", err)
 		}
-		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
+		newState = uint32(data[0]) | uint32(data[1])<<8 | uint32(data[2])<<16
 		changed := state ^ newState
 		state = newState
+		panel.setSwitches(PanelSwitches(state))
 		for i := SwitchId(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
