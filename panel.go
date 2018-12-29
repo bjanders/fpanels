@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-type Switch uint
+type SwitchId uint
 
 const (
 	USB_VENDOR_PANEL   = 0x06a3
@@ -26,12 +26,12 @@ type Panel struct {
 }
 
 type SwitchState struct {
-	Switch Switch
+	Switch SwitchId
 	Value  uint
 }
 
 type PanelReader interface {
-	noZeroSwitch(i Switch) bool
+	noZeroSwitch(i SwitchId) bool
 }
 
 func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan SwitchState) {
@@ -53,7 +53,7 @@ func readSwitches(panel PanelReader, inEndpoint *gousb.InEndpoint, c chan Switch
 		newState = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
 		changed := state ^ newState
 		state = newState
-		for i := Switch(0); i < 24; i++ {
+		for i := SwitchId(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
 				if val == 0 && panel.noZeroSwitch(i) {

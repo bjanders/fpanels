@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ALT Switch = iota
+	ALT SwitchId = iota
 	VS
 	IAS
 	HDG
@@ -156,7 +156,7 @@ func (panel *MultiPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *MultiPanel) noZeroSwitch(s Switch) bool {
+func (panel *MultiPanel) noZeroSwitch(s SwitchId) bool {
 	if s >= ALT && s <= ENC_CCW {
 		return true
 	}

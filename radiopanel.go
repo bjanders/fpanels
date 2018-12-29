@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	COM1_1 Switch = iota
+	COM1_1 SwitchId = iota
 	COM2_1
 	NAV1_1
 	NAV2_1
@@ -173,7 +173,7 @@ func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *RadioPanel) noZeroSwitch(s Switch) bool {
+func (panel *RadioPanel) noZeroSwitch(s SwitchId) bool {
 	if s == ACT_1 || s == ACT_2 {
 		return false
 	}

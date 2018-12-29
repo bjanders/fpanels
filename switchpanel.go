@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	BAT Switch = iota
+	BAT SwitchId = iota
 	ALTERNATOR
 	AVIONICS
 	FUEL
@@ -134,7 +134,7 @@ func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *SwitchPanel) noZeroSwitch(s Switch) bool {
+func (panel *SwitchPanel) noZeroSwitch(s SwitchId) bool {
 	if s >= ENG_OFF && s <= ENG_START {
 		return true
 	}
