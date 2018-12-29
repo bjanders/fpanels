@@ -54,6 +54,7 @@ type RadioPanel struct {
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
+	panel.id = RADIO
 	for i := range panel.displayState {
 		panel.displayState[i] = blank
 	}
@@ -94,6 +95,10 @@ func (panel *RadioPanel) Close() {
 	if panel.ctx != nil {
 		panel.ctx.Close()
 	}
+}
+
+func (panel *RadioPanel) Id() PanelId {
+	return panel.id
 }
 
 func (panel *RadioPanel) setSwitches(s PanelSwitches) {
@@ -155,7 +160,7 @@ func (panel *RadioPanel) DisplayInt(display DisplayId, n int) {
 }
 
 func (panel *RadioPanel) DisplayFloat(display DisplayId, n float64, decimals int) {
-	panel.DisplayString(display, fmt.Sprintf("%.*f", decimals,  n))
+	panel.DisplayString(display, fmt.Sprintf("%.*f", decimals, n))
 }
 
 func (panel *RadioPanel) DisplayOff() {

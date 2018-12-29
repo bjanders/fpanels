@@ -55,6 +55,7 @@ type SwitchPanel struct {
 func NewSwitchPanel() (*SwitchPanel, error) {
 	var err error
 	panel := SwitchPanel{}
+	panel.id = SWITCH
 	panel.displayState[0] = 0
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
@@ -92,6 +93,10 @@ func (panel *SwitchPanel) Close() {
 	if panel.ctx != nil {
 		panel.ctx.Close()
 	}
+}
+
+func (panel *SwitchPanel) Id() PanelId {
+	return panel.id
 }
 
 func (panel *SwitchPanel) setSwitches(s PanelSwitches) {

@@ -29,12 +29,14 @@ type Panel struct {
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
 	displayMutex sync.Mutex
+	id PanelId
 	Switches     PanelSwitches
 	displayDirty bool
 	intfDone     func()
 }
 
 type SwitchState struct {
+	Panel PanelId
 	Switch SwitchId
 	Value  uint
 }
@@ -46,6 +48,7 @@ type DisplayId uint
 type SwitchingPanel interface {
 	setSwitches(s PanelSwitches)
 	noZeroSwitch(i SwitchId) bool
+	Id() PanelId
 }
 
 func (switches PanelSwitches) IsSet(id SwitchId) bool {
@@ -78,7 +81,7 @@ func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan Swi
 				if val == 0 && panel.noZeroSwitch(i) {
 					continue
 				}
-				c <- SwitchState{i, val}
+				c <- SwitchState{panel.Id(), i, val}
 			}
 		}
 	}

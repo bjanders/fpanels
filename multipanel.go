@@ -43,6 +43,7 @@ type MultiPanel struct {
 func NewMultiPanel() (*MultiPanel, error) {
 	var err error
 	panel := MultiPanel{}
+	panel.id = MULTI
 	for i := range panel.displayState {
 		panel.displayState[i] = 0x0f
 	}
@@ -83,6 +84,10 @@ func (panel *MultiPanel) Close() {
 	if panel.ctx != nil {
 		panel.ctx.Close()
 	}
+}
+
+func (panel *MultiPanel) Id() PanelId {
+	return panel.id
 }
 
 func (panel *MultiPanel) setSwitches(s PanelSwitches) {
