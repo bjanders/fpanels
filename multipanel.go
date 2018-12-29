@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	ROW_1 Display = iota
+	ROW_1 DisplayId = iota
 	ROW_2
 )
 
@@ -87,11 +87,11 @@ func (panel *MultiPanel) Close() {
 
 // FIX: Add DisplayString() function
 
-func (panel *MultiPanel) DisplayInt(display Display, n int) error {
+func (panel *MultiPanel) DisplayInt(display DisplayId, n int) error {
 	return panel.DisplayFloat(display, float32(n), 0)
 }
 
-func (panel *MultiPanel) DisplayFloat(display Display, n float32, decimals int) error {
+func (panel *MultiPanel) DisplayFloat(display DisplayId, n float32, decimals int) error {
 	neg := false
 
 	if decimals < 0 || decimals > 5 {

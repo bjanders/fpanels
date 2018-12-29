@@ -34,10 +34,8 @@ const (
 	ENC2_CCW_2
 )
 
-type Display int
-
 const (
-	ACTIVE_1 Display = iota
+	ACTIVE_1 DisplayId = iota
 	STANDBY_1
 	ACTIVE_2
 	STANDBY_2
@@ -95,11 +93,11 @@ func (panel *RadioPanel) Close() {
 
 // FIX: Add DisplayString() function
 
-func (panel *RadioPanel) DisplayInt(display Display, n int) error {
+func (panel *RadioPanel) DisplayInt(display DisplayId, n int) error {
 	return panel.DisplayFloat(display, float32(n), 0)
 }
 
-func (panel *RadioPanel) DisplayFloat(display Display, n float32, decimals int) error {
+func (panel *RadioPanel) DisplayFloat(display DisplayId, n float32, decimals int) error {
 	neg := false
 
 	if decimals < 0 || decimals > 5 {

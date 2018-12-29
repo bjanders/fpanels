@@ -15,6 +15,14 @@ const (
 	USB_PRODUCT_SWITCH = 0x0d67
 )
 
+type PanelId int
+
+const (
+	RADIO PanelId =  iota
+	MULTI
+	SWITCH
+)
+
 type Panel struct {
 	ctx          *gousb.Context
 	device       *gousb.Device
@@ -29,6 +37,8 @@ type SwitchState struct {
 	Switch SwitchId
 	Value  uint
 }
+
+type DisplayId uint
 
 type PanelReader interface {
 	noZeroSwitch(i SwitchId) bool
