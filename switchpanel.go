@@ -79,6 +79,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
+	panel.Connected = true
 	return &panel, nil
 }
 
@@ -107,25 +108,33 @@ func (panel *SwitchPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
 
-func (panel *SwitchPanel) SetGear(s byte) {
+func (panel *SwitchPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
-	panel.displayState[0] = s
+	panel.displayState[0] = leds
 	panel.displayDirty = true
 	panel.displayMutex.Unlock()
 }
 
-func (panel *SwitchPanel) SetGearOn(s byte) {
+func (panel *SwitchPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
-	panel.displayState[0] = panel.displayState[0] | s
+	panel.displayState[0] = panel.displayState[0] | leds
 	panel.displayDirty = true
 	panel.displayMutex.Unlock()
 }
 
-func (panel *SwitchPanel) SetGearOff(s byte) {
+func (panel *SwitchPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
-	panel.displayState[0] = panel.displayState[0] & ^s
+	panel.displayState[0] = panel.displayState[0] & ^leds
 	panel.displayDirty = true
 	panel.displayMutex.Unlock()
+}
+
+func (panel *SwitchPanel) LEDsOnOff(leds byte, val float64) {
+	if val > 0 {
+		panel.LEDsOn(leds)
+	} else {
+		panel.LEDsOff(leds)
+	}
 }
 
 func (panel *SwitchPanel) refreshDisplay() {
