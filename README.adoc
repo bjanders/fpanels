@@ -123,7 +123,7 @@ The 10 numbers on the segment display are encoded as follows:
 ----
 
 If 0x0f is set for all 10 numbers then the display is turned off, including the
-text of the left of the numbers.
+text on the left of the numbers.
 
 Other values outside the range 0-9 will also turn off the number. The Logitech
 software uses 0x0f.
