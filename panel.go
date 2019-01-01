@@ -3,7 +3,6 @@ package fpanels
 import (
 	"errors"
 	"github.com/google/gousb"
-	"log"
 	"strings"
 	"sync"
 )
@@ -215,21 +214,21 @@ func (switches PanelSwitches) IsSet(id SwitchId) bool {
 	return uint32(switches)&1<<uint32(id) != 0
 }
 
-func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan SwitchState) {
+func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan SwitchState) error {
 	var data [3]byte
 	var state uint32
 	var newState uint32
 
 	stream, err := inEndpoint.NewStream(3, 1)
 	if err != nil {
-		log.Fatalf("Could not create read stream: %v", err)
+		return err
 	}
 	defer stream.Close()
 
 	for {
 		_, err := stream.Read(data[:])
 		if err != nil {
-			log.Fatalf("Read error: %v", err)
+			return err
 		}
 		newState = uint32(data[0]) | uint32(data[1])<<8 | uint32(data[2])<<16
 		changed := state ^ newState
