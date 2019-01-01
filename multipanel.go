@@ -1,12 +1,12 @@
 package fpanels
 
 import (
-	"errors"
+	"fmt"
 	"github.com/google/gousb"
-	"math"
 	"time"
 )
 
+// Buttons
 const (
 	ALT SwitchId = iota
 	VS
@@ -90,6 +90,7 @@ func NewMultiPanel() (*MultiPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
+	panel.Connected = true
 	return &panel, nil
 }
 
@@ -118,56 +119,80 @@ func (panel *MultiPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
 
-// FIX: Add DisplayString() function
-
-func (panel *MultiPanel) DisplayInt(display DisplayId, n int) error {
-	return panel.DisplayFloat(display, float32(n), 0)
+func (panel *MultiPanel) LEDs(leds byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[10] = leds
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
 }
 
-func (panel *MultiPanel) DisplayFloat(display DisplayId, n float32, decimals int) error {
-	neg := false
+func (panel *MultiPanel) LEDsOn(leds byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[10] = panel.displayState[10] | leds
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
+}
 
-	if decimals < 0 || decimals > 5 {
-		return errors.New("decimals out of range")
+func (panel *MultiPanel) LEDsOff(leds byte) {
+	panel.displayMutex.Lock()
+	panel.displayState[10] = panel.displayState[10] & ^leds
+	panel.displayDirty = true
+	panel.displayMutex.Unlock()
+}
+
+func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
+	if val > 0 {
+		panel.LEDsOn(leds)
+	} else {
+		panel.LEDsOff(leds)
 	}
-	// Get an integer number that contains all digits
-	// we want to display
-	tempN := int(n * float32(math.Pow10(decimals)))
-	if tempN < 0 {
-		tempN = -tempN
-		neg = true
+}
+
+func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
+	if display != ROW_1 && display != ROW_2 {
+		return
 	}
-	if display < 0 || display > 1 {
-		return errors.New("display number out of range")
+
+	var d [5]byte
+	displayStart := int(display) * 5
+	disp := panel.displayState[displayStart : displayStart+5]
+	dIdx := 0
+	for _, c := range s {
+		switch c {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			d[dIdx] = byte(c - '0')
+			dIdx++
+		case ' ':
+			d[dIdx] = blank
+			dIdx++
+		case '-':
+			d[dIdx] = multi_dash
+			dIdx++
+		default:
+			// leave current char as is
+			d[dIdx] = disp[dIdx]
+			dIdx++
+		}
 	}
-	if tempN < -9999 || tempN > 99999 {
-		return errors.New("value to be displayed out of range")
-	}
+
 	panel.displayMutex.Lock()
 	defer panel.displayMutex.Unlock()
 	panel.displayDirty = true
-	for digit := 0; digit < 5; digit++ {
-		var v int
-		// Get the number we want to display in the 10s
-		pow := int(math.Pow10(digit))
-		// FIX: Show leading zero
-		if pow > tempN {
-			if neg {
-				v = 0xde
-				neg = false
-			} else {
-				v = 0xff
-			}
+	dIdx--
+	// align right and fill with blanks
+	for i := 4; i >= 0; i-- {
+		if dIdx < 0 {
+			disp[i] = blank
 		} else {
-			v = (tempN / pow) % 10
-			if decimals != 0 && digit == decimals {
-				v |= 0xd0
-			}
+			disp[i] = d[dIdx]
 		}
-		i := int(display)*5 + 4 - digit
-		panel.displayState[i] = byte(v)
+		dIdx--
 	}
-	return nil
+}
+
+func (panel *MultiPanel) DisplayInt(display DisplayId, n int) {
+	s := fmt.Sprintf("%d", n)
+	panel.DisplayString(display, s)
 }
 
 func (panel *MultiPanel) refreshDisplay() {
@@ -176,7 +201,7 @@ func (panel *MultiPanel) refreshDisplay() {
 		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
 		if panel.displayDirty {
-			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[0:11])
+			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[:])
 			panel.displayDirty = false
 		}
 		panel.displayMutex.Unlock()
