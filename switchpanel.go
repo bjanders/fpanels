@@ -29,22 +29,22 @@ const (
 )
 
 const (
-	GREEN_N byte = 1 << iota
-	GREEN_L
-	GREEN_R
-	RED_N
-	RED_L
-	RED_R
-	YELLOW_N   = GREEN_N | RED_N
-	YELLOW_L   = GREEN_L | RED_L
-	YELLOW_R   = GREEN_R | RED_R
-	GREEN_ALL  = GREEN_N | GREEN_L | GREEN_R
-	RED_ALL    = RED_N | RED_L | RED_R
-	YELLOW_ALL = YELLOW_N | YELLOW_L | YELLOW_R
-	GEAR_N     = YELLOW_N
-	GEAR_L     = YELLOW_L
-	GEAR_R     = YELLOW_R
-	GEAR_ALL   = YELLOW_ALL
+	N_GREEN byte = 1 << iota
+	L_GREEN
+	R_GREEN
+	N_RED
+	L_RED
+	R_RED
+	N_YELLOW   = N_GREEN | N_RED
+	L_YELLOW   = L_GREEN | L_RED
+	R_YELLOW   = R_GREEN | R_RED
+	ALL_GREEN  = N_GREEN | L_GREEN | R_GREEN
+	ALL_RED    = N_RED | L_RED | R_RED
+	ALL_YELLOW = N_YELLOW | L_YELLOW | R_YELLOW
+	N_ALL      = N_YELLOW
+	L_ALL      = L_YELLOW
+	R_ALL      = R_YELLOW
+	ALL        = ALL_YELLOW
 )
 
 type SwitchPanel struct {
