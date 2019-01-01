@@ -20,6 +20,7 @@ const (
 	BTN_NAV
 	BTN_IAS
 	BTN_ALT
+	BTN_VS
 	BTN_APR
 	BTN_REV
 	_
@@ -29,6 +30,20 @@ const (
 	TRIM_DOWN
 	TRIM_UP
 )
+
+// LED lights
+const (
+	LED_AP byte = 1 << iota
+	LED_HDG
+	LED_NAV
+	LED_IAS
+	LED_ALT
+	LED_VS
+	LED_APR
+	LED_REV
+)
+
+const multi_dash = 0xde
 
 const (
 	ROW_1 DisplayId = iota
