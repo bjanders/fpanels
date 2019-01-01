@@ -60,7 +60,12 @@ func NewMultiPanel() (*MultiPanel, error) {
 	panel := MultiPanel{}
 	panel.id = MULTI
 	for i := range panel.displayState {
-		panel.displayState[i] = 0x0f
+		if i == 10 {
+			// 11th byte is the LEDs
+			panel.displayState[i] = 0x00
+		} else {
+			panel.displayState[i] = blank
+		}
 	}
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
