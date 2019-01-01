@@ -17,12 +17,14 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 	defer radioPanel.Close()
+	radioSwitches := radioPanel.WatchSwitches()
 	for i := -500; i < 500; i++ {
 		time.Sleep(1000 * time.Microsecond)
 		radioPanel.DisplayInt(fpanels.ACTIVE_1, i)
 		s := fmt.Sprintf("%d.0", i)
 		radioPanel.DisplayString(fpanels.ACTIVE_2, s)
 		radioPanel.DisplayFloat(fpanels.STANDBY_1, float64(i), 2)
+		radioPanel.DisplayInt(fpanels.STANDBY_2, i * 1000)
 	}
 	radioPanel.DisplayString(fpanels.ACTIVE_2, "")
 	sleep()
@@ -47,7 +49,6 @@ func main() {
 		time.Sleep(100 * time.Millisecond)
 	}
 	radioPanel.DisplayString(fpanels.ACTIVE_2, " . . . . .")
-	radioSwitches := radioPanel.WatchSwitches()
 	var switchState fpanels.SwitchState
 	for {
 		switchState = <-radioSwitches
