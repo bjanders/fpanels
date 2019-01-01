@@ -81,6 +81,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
+	panel.Connected = true
 	return &panel, nil
 }
 
@@ -110,6 +111,9 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 }
 
 func (panel *RadioPanel) DisplayString(display DisplayId, s string) {
+	if display < ACTIVE_1 || display > STANDBY_2 {
+		return
+	}
 	var d [5]byte
 	displayStart := int(display) * 5
 	disp := panel.displayState[displayStart : displayStart+5]
@@ -178,7 +182,7 @@ func (panel *RadioPanel) refreshDisplay() {
 		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
 		if panel.displayDirty {
-			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[0:20])
+			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[:])
 			panel.displayDirty = false
 		}
 		panel.displayMutex.Unlock()
