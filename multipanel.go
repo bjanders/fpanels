@@ -23,7 +23,6 @@ const (
 	BTN_VS
 	BTN_APR
 	BTN_REV
-	_
 	AUTO_THROTTLE
 	FLAPS_UP
 	FLAPS_DOWN
@@ -158,21 +157,21 @@ func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
 	disp := panel.displayState[displayStart : displayStart+5]
 	dIdx := 0
 	for _, c := range s {
+		if dIdx > 4 {
+			break
+		}
 		switch c {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			d[dIdx] = byte(c - '0')
-			dIdx++
 		case ' ':
 			d[dIdx] = blank
-			dIdx++
 		case '-':
 			d[dIdx] = multi_dash
-			dIdx++
 		default:
 			// leave current char as is
 			d[dIdx] = disp[dIdx]
-			dIdx++
 		}
+		dIdx++
 	}
 
 	panel.displayMutex.Lock()
