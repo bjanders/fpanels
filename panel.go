@@ -52,6 +52,7 @@ type SwitchingPanel interface {
 	setSwitches(s PanelSwitches)
 	noZeroSwitch(i SwitchId) bool
 	Id() PanelId
+	IsSwitchSet(i SwitchId) bool
 }
 
 type StringDisplayer interface {
@@ -83,7 +84,7 @@ func PanelIdString(s string) (PanelId, error) {
 var SwitchIdMap = map[string]SwitchId{
 	// radio
 	"COM1_1":     COM1_1,
-	"COM2_1":     COM2_2,
+	"COM2_1":     COM2_1,
 	"NAV1_1":     NAV1_1,
 	"NAV2_1":     NAV2_1,
 	"ADF_1":      ADF_1,
@@ -212,6 +213,10 @@ func DisplayIdString(s string) (DisplayId, error) {
 
 func (switches PanelSwitches) IsSet(id SwitchId) bool {
 	return uint32(switches)&1<<uint32(id) != 0
+}
+
+func (switches PanelSwitches) SwitchState(id SwitchId) uint {
+	return uint((uint32(switches) >> uint32(id)) & 1)
 }
 
 func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan SwitchState) error {
