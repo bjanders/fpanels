@@ -50,7 +50,7 @@ const (
 	ROW_2
 )
 
-// Saitek/Logitech multi panel. The panel has:
+// MultiPanel represents a Saitek/Logitech multi panel. The panel has:
 //
 // - A five position switch
 //
@@ -178,7 +178,6 @@ func (panel *MultiPanel) LEDsOff(leds byte) {
 // other LEDs are left intact. See the LED_* constants.
 // Multiple LEDs can be ORed together, for example
 //   panel.LEDsOnOff(LED_AP | LED_VS, 1)
-
 func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 	if val > 0 {
 		panel.LEDsOn(leds)

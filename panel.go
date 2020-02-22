@@ -11,8 +11,6 @@ import (
 	"sync"
 )
 
-type SwitchId uint
-
 // USB vendor and product IDs
 const (
 	USB_VENDOR_PANEL   = 0x06a3
@@ -21,14 +19,20 @@ const (
 	USB_PRODUCT_SWITCH = 0x0d67
 )
 
+// SwitchId identifies a switch on a panel
+type SwitchId uint
+
+// PanelId identifies the panel type
 type PanelId int
 
+// PanelIds
 const (
 	RADIO PanelId = iota
 	MULTI
 	SWITCH
 )
 
+// Panel is the base struct for all panels
 type Panel struct {
 	ctx          *gousb.Context
 	device       *gousb.Device
@@ -42,16 +46,20 @@ type Panel struct {
 	Connected    bool
 }
 
+// SwitchState contains the state of a switch on a panel
 type SwitchState struct {
 	Panel  PanelId
 	Switch SwitchId
 	Value  uint
 }
 
+// PanelSwitches is the state of all switches on a panel, one bit per switch
 type PanelSwitches uint32
 
+// DisplayId identifies a display on a panel
 type DisplayId uint
 
+// SwitchingPanel provides an interface to panels with switches
 type SwitchingPanel interface {
 	setSwitches(s PanelSwitches)
 	noZeroSwitch(i SwitchId) bool
@@ -72,7 +80,7 @@ type LEDDisplayer interface {
 	LEDsOnOff(leds byte, val float64)
 }
 
-// PaneldIdMap maps a panel Id string to a PanelId
+// PanelIdMap maps a panel Id string to a PanelId
 var PanelIdMap = map[string]PanelId{
 	"RADIO":  RADIO,
 	"MULTI":  MULTI,
@@ -206,7 +214,7 @@ func SwitchIdString(s string) (SwitchId, error) {
 	return p, nil
 }
 
-// LEDstring maps a LED name to the corresponding LED bits. The string s
+// LEDString maps a LED name to the corresponding LED bits. The string s
 // is case insensitive.
 func LEDString(s string) (byte, error) {
 	s = strings.ToUpper(s)
@@ -233,6 +241,7 @@ func (switches PanelSwitches) IsSet(id SwitchId) bool {
 	return uint32(switches)&1<<uint32(id) != 0
 }
 
+// SwitchState returns the statee of the switch with ID id, 0 or 1
 func (switches PanelSwitches) SwitchState(id SwitchId) uint {
 	return uint((uint32(switches) >> uint32(id)) & 1)
 }

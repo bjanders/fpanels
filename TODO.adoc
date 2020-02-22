@@ -8,3 +8,6 @@ Things to fix and improve
 ** Use `WaitGroup`
 * Use `sync.Cond` to wake display refresher only when necessary
 * Code documentation
+* Fix according to Go code convention
+** don't use ALL_CAPS in Go names; use CamelCase
+** Rename all Id to ID

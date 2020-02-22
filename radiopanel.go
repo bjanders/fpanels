@@ -121,6 +121,7 @@ func (panel *RadioPanel) setSwitches(s PanelSwitches) {
 	panel.Switches = s
 }
 
+// IsSwitchSet returns true if the switch is with ID id is set
 func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
