@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/bjanders/fpanels"
 	"log"
 	"time"
-	"fmt"
 )
 
 func main() {
