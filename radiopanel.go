@@ -127,10 +127,10 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 }
 
 // DisplayString displays the string s on the given display. The string is limited
-// to the numbers 0-9, a dot ',', dash/minus '-' and space, with a length of max
+// to the numbers 0-9, a dot '.', dash/minus '-' and space, with a length of max
 // five characters.  If any other character is
-// used then the underlying previous characther is left intact. This allows you to
-// update different areas of the dislay in sepeate calls. For example:
+// used then the underlying previous character is left intact. This allows you to
+// update different areas of the dislay in separate calls. For example:
 //   panel.DisplayString(ACTIVE_1, "12   ")
 //   panel.DisplayString(ACTIVE_1, "** 34")
 //   panel.DisplayString(ACTIVE_1, "** 56")
@@ -192,8 +192,8 @@ func (panel *RadioPanel) DisplayInt(display DisplayId, n int) {
 	panel.DisplayString(display, fmt.Sprintf("%d", n))
 }
 
-// DisplayFloat displays the floating point number n with decimals decimals on the
-// given display
+// DisplayFloat displays the floating point number n with the given number of
+// decimals on the given display
 func (panel *RadioPanel) DisplayFloat(display DisplayId, n float64, decimals int) {
 	panel.DisplayString(display, fmt.Sprintf("%.*f", decimals, n))
 }
