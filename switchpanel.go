@@ -49,7 +49,7 @@ const (
 	ALL        = ALL_YELLOW
 )
 
-// Saitek/Logitech switch panel. The panel has:
+// SwitchPanel represents a Saitek/Logitech switch panel. The panel has:
 //
 // - A five position switch
 //
@@ -184,7 +184,7 @@ func (panel *SwitchPanel) refreshDisplay() {
 	}
 }
 
-// WatchSwtiches creates a channel for reeiving SwitchState events
+// WatchSwitches creates a channel for reeiving SwitchState events
 // whenever the state of a swtich changes.
 func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)

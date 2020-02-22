@@ -42,7 +42,7 @@ const (
 	LED_REV
 )
 
-const multi_dash = 0xde
+const multiDash = 0xde
 
 // Multi panel displays
 const (
@@ -163,7 +163,7 @@ func (panel *MultiPanel) LEDsOn(leds byte) {
 }
 
 // LEDsOff turns off the LEDs given by leds and leaves all other LED states
-// intact. See the LED_* constants. Multiple LEDs can be ORed togehter.
+// intact. See the LED_* constants. Multiple LEDs can be ORed together.
 // For example
 //   panel.LEDsOff(LED_AP | LED_VS)
 func (panel *MultiPanel) LEDsOff(leds byte) {
@@ -176,7 +176,7 @@ func (panel *MultiPanel) LEDsOff(leds byte) {
 // LEDsOnOff turns on or off the LEDs given by leds. If val is 0 then
 // the LEDs will be turned offm else they will be turned on. All
 // other LEDs are left intact. See the LED_* constants.
-// Multiple LEDs can be ORed togehter, for example
+// Multiple LEDs can be ORed together, for example
 //   panel.LEDsOnOff(LED_AP | LED_VS, 1)
 
 func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
@@ -218,7 +218,7 @@ func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
 		case ' ':
 			d[dIdx] = blank
 		case '-':
-			d[dIdx] = multi_dash
+			d[dIdx] = multiDash
 		default:
 			// leave current char as is
 			d[dIdx] = disp[dIdx]

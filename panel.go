@@ -79,7 +79,7 @@ var PanelIdMap = map[string]PanelId{
 	"SWITCH": SWITCH,
 }
 
-// PanelIdString maps a panel string to a PanelId. The string s is case insensitve.
+// PanelIdString maps a panel string to a PanelId. The string s is case insensitive.
 func PanelIdString(s string) (PanelId, error) {
 	s = strings.ToUpper(s)
 	p, ok := PanelIdMap[s]
@@ -196,7 +196,7 @@ var DisplayMap = map[string]DisplayId{
 }
 
 // SwitchIdString maps a Switch ID string to a SwitchId. The ID string s
-// is case insensitve.
+// is case insensitive.
 func SwitchIdString(s string) (SwitchId, error) {
 	s = strings.ToUpper(s)
 	p, ok := SwitchIdMap[s]
@@ -207,7 +207,7 @@ func SwitchIdString(s string) (SwitchId, error) {
 }
 
 // LEDstring maps a LED name to the corresponding LED bits. The string s
-// is case insensitve.
+// is case insensitive.
 func LEDString(s string) (byte, error) {
 	s = strings.ToUpper(s)
 	l, ok := LEDMap[s]
@@ -218,7 +218,7 @@ func LEDString(s string) (byte, error) {
 }
 
 // DisplayIdString maps a Display name to the DisplayId. The string s
-// is case insesitve.
+// is case insesitive.
 func DisplayIdString(s string) (DisplayId, error) {
 	s = strings.ToUpper(s)
 	d, ok := DisplayMap[s]

@@ -48,7 +48,7 @@ const (
 	STANDBY_2
 )
 
-// Saitek/Logitech radio panel. The panel has:
+// RadioPanel represents a Saitek/Logitech radio panel. The panel has:
 //
 // - Two seven position function switches
 //
@@ -127,7 +127,7 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 
 // DisplayString displays the string s on the given display. The string is limited
 // to the numbers 0-9, a dot ',', dash/minus '-' and space, with a length of max
-// five characters.  If any other charachter is
+// five characters.  If any other character is
 // used then the underlying previous characther is left intact. This allows you to
 // update different areas of the dislay in sepeate calls. For example:
 //   panel.DisplayString(ACTIVE_1, "12   ")
@@ -220,7 +220,7 @@ func (panel *RadioPanel) refreshDisplay() {
 	}
 }
 
-// WatchSwitches creates a channel for receving SwitchState events
+// WatchSwitches creates a channel for receiving SwitchState events
 // whenever the state of a switch changes
 func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
