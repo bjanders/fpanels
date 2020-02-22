@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Buttons
+// Multi panel switches and buttons
 const (
 	ALT SwitchId = iota
 	VS
@@ -30,7 +30,7 @@ const (
 	TRIM_UP
 )
 
-// LED lights
+// Multi panel button LED lights
 const (
 	LED_AP byte = 1 << iota
 	LED_HDG
@@ -44,16 +44,34 @@ const (
 
 const multi_dash = 0xde
 
+// Multi panel displays
 const (
 	ROW_1 DisplayId = iota
 	ROW_2
 )
 
+// Saitek/Logitech multi panel. The panel has:
+//
+// - A five position switch
+//
+// - Eight push buttons with individually controlable backlight.
+//
+// - A rotary encoder
+//
+// - A two position switch
+//
+// - A two position momentary switch
+//
+// - A pitch trim rotary encoder
+//
+// - A two row segment display with five numbers on each row. Use DisplayString or DisplayInt to display
+// text on the panels. The displays are identified by the ROW_1 and ROW_2 constants.
 type MultiPanel struct {
 	Panel
 	displayState [11]byte
 }
 
+// NewMultiPanel creates a new instances of the Logitech/Saitek multipanel
 func NewMultiPanel() (*MultiPanel, error) {
 	var err error
 	panel := MultiPanel{}
@@ -93,6 +111,8 @@ func NewMultiPanel() (*MultiPanel, error) {
 	return &panel, nil
 }
 
+// Close disconnects the connection to the multipanel and releases all
+// related resources.
 func (panel *MultiPanel) Close() {
 	// FIX: Stop threads
 	if panel.intfDone != nil {
@@ -106,6 +126,7 @@ func (panel *MultiPanel) Close() {
 	}
 }
 
+// Id returns MULTI
 func (panel *MultiPanel) Id() PanelId {
 	return panel.id
 }
@@ -114,10 +135,15 @@ func (panel *MultiPanel) setSwitches(s PanelSwitches) {
 	panel.Switches = s
 }
 
+// IsSwitchSet retruns true if SwitchId id is set
 func (panel *MultiPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
 
+// LEDs turns on/off the LEDs given by leds. See the LED_* constants.
+// For example calling
+//   panel.LEDs(LED_AP | LED_VS)
+// will turn on the AP and VS LEDs and turn off all other LEDs.
 func (panel *MultiPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = leds
@@ -125,6 +151,10 @@ func (panel *MultiPanel) LEDs(leds byte) {
 	panel.displayMutex.Unlock()
 }
 
+// LEDsOn turns on the LEDs given by leds and leaves all other LED states
+// intact. See the LED_* constants. Multiple LEDs can be ORed together,
+// for example
+//   panel.LEDsOn(LED_AP | LED_VS)
 func (panel *MultiPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] | leds
@@ -132,12 +162,22 @@ func (panel *MultiPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Unlock()
 }
 
+// LEDsOff turns off the LEDs given by leds and leaves all other LED states
+// intact. See the LED_* constants. Multiple LEDs can be ORed togehter.
+// For example
+//   panel.LEDsOff(LED_AP | LED_VS)
 func (panel *MultiPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] & ^leds
 	panel.displayDirty = true
 	panel.displayMutex.Unlock()
 }
+
+// LEDsOnOff turns on or off the LEDs given by leds. If val is 0 then
+// the LEDs will be turned offm else they will be turned on. All
+// other LEDs are left intact. See the LED_* constants.
+// Multiple LEDs can be ORed togehter, for example
+//   panel.LEDsOnOff(LED_AP | LED_VS, 1)
 
 func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 	if val > 0 {
@@ -147,6 +187,18 @@ func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 	}
 }
 
+// DisplayString displays the string given by s on the display given by
+// display. The string is limited to the numbers 0-9 and spaces. ROW_2 can
+// additionally show a dash/minus '-'. If any other char is used the
+// underlying previous character is left intact. This allows you to update
+// different areas of the dislay in sepeate calls. For example:
+//   panel.DisplayString(DISPLAY_1, "12   ")
+//   panel.DisplayString(DISPLAY_1, "** 34")
+//   panel.DisplayString(DISPLAY_1, "** 56")
+// will display the the following sequence on the upper display:
+//   12
+//   12 34
+//   12 56
 func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
 	if display != ROW_1 && display != ROW_2 {
 		return
@@ -189,6 +241,7 @@ func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
 	}
 }
 
+// DisplayInt will display the integer n on the given display
 func (panel *MultiPanel) DisplayInt(display DisplayId, n int) {
 	s := fmt.Sprintf("%d", n)
 	panel.DisplayString(display, s)
@@ -207,6 +260,8 @@ func (panel *MultiPanel) refreshDisplay() {
 	}
 }
 
+// WatchSwitches creates a channel for receiving SwitchState events
+// whenever the state of a switch changes.
 func (panel *MultiPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
 	go readSwitches(panel, panel.inEndpoint, c)

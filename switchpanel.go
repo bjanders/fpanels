@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Switch panel switches
 const (
 	BAT SwitchId = iota
 	ALTERNATOR
@@ -28,6 +29,7 @@ const (
 	GEAR_DOWN
 )
 
+// Switch panel landing gear lights
 const (
 	N_GREEN byte = 1 << iota
 	L_GREEN
@@ -47,11 +49,21 @@ const (
 	ALL        = ALL_YELLOW
 )
 
+// Saitek/Logitech switch panel. The panel has:
+//
+// - A five position switch
+//
+// - Thirteen two position switches
+//
+// - A two position landing gear lever
+//
+// - Three red/green landing gear indicator LEDs
 type SwitchPanel struct {
 	Panel
 	displayState [1]byte
 }
 
+// NewSwitchPanel create a new instance of the Logitech/Saitek switch panel
 func NewSwitchPanel() (*SwitchPanel, error) {
 	var err error
 	panel := SwitchPanel{}
@@ -83,6 +95,8 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	return &panel, nil
 }
 
+// Close disconnects the connection to the switch panel and releases all
+// related resources
 func (panel *SwitchPanel) Close() {
 	// FIX: Stop threads
 	if panel.intfDone != nil {
@@ -96,6 +110,7 @@ func (panel *SwitchPanel) Close() {
 	}
 }
 
+// Id returns SWITCH
 func (panel *SwitchPanel) Id() PanelId {
 	return panel.id
 }
@@ -104,10 +119,16 @@ func (panel *SwitchPanel) setSwitches(s PanelSwitches) {
 	panel.Switches = s
 }
 
+// IsSwitchSet returns true if the switch is set
 func (panel *SwitchPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
 
+// LEDs turns on/off the LEDs given by leds. See the LED_* constants.
+// For example calling
+//   panel.LEDs(L_GREEN | R_GREEN)
+// will turn on the left and right green landing gear LEDs and turn off
+// all other LEDs
 func (panel *SwitchPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = leds
@@ -115,6 +136,10 @@ func (panel *SwitchPanel) LEDs(leds byte) {
 	panel.displayMutex.Unlock()
 }
 
+// LEDsOn turns on the ELDS given by leds and leaves the other LED states
+// intact. See the switch panel LED constants. Multiple LEDs can be ORed
+// together. For example:
+//  panel.LEDsOn(L_GREEN | R_GREEN)
 func (panel *SwitchPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] | leds
@@ -122,6 +147,10 @@ func (panel *SwitchPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Unlock()
 }
 
+// LEDsOff turn off the LEDs given by leds and leaves all other LED states
+// instact. See the switch panel LED constants. Multiple LEDs can be ORed
+// together. For example:
+//   panel.LEDsOff(L_GREEN | R_GREEN)
 func (panel *SwitchPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] & ^leds
@@ -129,6 +158,11 @@ func (panel *SwitchPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Unlock()
 }
 
+// LEDsOnOff turns on or off the LEDs given by leds. If val is 0 then
+// the LEDs will be turned off, else they will be turned on. All other
+// LEDs are left intact. See the switch panel LED constants.
+// Multiple LEDs can be ORed togethe, for example:
+//   panel.LEDsOnOff(L_GREEN | R_GREEN, 1)
 func (panel *SwitchPanel) LEDsOnOff(leds byte, val float64) {
 	if val > 0 {
 		panel.LEDsOn(leds)
@@ -150,6 +184,8 @@ func (panel *SwitchPanel) refreshDisplay() {
 	}
 }
 
+// WatchSwtiches creates a channel for reeiving SwitchState events
+// whenever the state of a swtich changes.
 func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
 	go readSwitches(panel, panel.inEndpoint, c)

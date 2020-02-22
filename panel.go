@@ -1,3 +1,7 @@
+// Package fpanels provides an interface to Logitech/Saitek flight panels.
+//
+// Use the New*Panel() functions to create an instance of the specific panel
+// type. When you are done, call the panel's Close() function.
 package fpanels
 
 import (
@@ -55,10 +59,12 @@ type SwitchingPanel interface {
 	IsSwitchSet(i SwitchId) bool
 }
 
+// StringDisplayer provides an interface to panels that can display strings
 type StringDisplayer interface {
 	DisplayString(display DisplayId, s string)
 }
 
+// LEDDisplayer priovides an interface to panels that has LEDs
 type LEDDisplayer interface {
 	LEDs(leds byte)
 	LEDsOn(leds byte)
@@ -66,12 +72,14 @@ type LEDDisplayer interface {
 	LEDsOnOff(leds byte, val float64)
 }
 
+// PaneldIdMap maps a panel Id string to a PanelId
 var PanelIdMap = map[string]PanelId{
 	"RADIO":  RADIO,
 	"MULTI":  MULTI,
 	"SWITCH": SWITCH,
 }
 
+// PanelIdString maps a panel string to a PanelId. The string s is case insensitve.
 func PanelIdString(s string) (PanelId, error) {
 	s = strings.ToUpper(s)
 	p, ok := PanelIdMap[s]
@@ -81,6 +89,7 @@ func PanelIdString(s string) (PanelId, error) {
 	return p, nil
 }
 
+// SwitchIdMap maps a switch ID string to a SwitchId
 var SwitchIdMap = map[string]SwitchId{
 	// radio
 	"COM1_1":     COM1_1,
@@ -151,6 +160,7 @@ var SwitchIdMap = map[string]SwitchId{
 	"GEAR_DOWN":  GEAR_DOWN,
 }
 
+// LEDMap maps a LED Id string to the corresponding LED bits
 var LEDMap = map[string]byte{
 	// switch
 	"N_GREEN":  N_GREEN,
@@ -173,6 +183,7 @@ var LEDMap = map[string]byte{
 	"LED_REV": LED_REV,
 }
 
+// DisplayMap maps the display names to a DisplayId
 var DisplayMap = map[string]DisplayId{
 	// radio
 	"ACTIVE_1":  ACTIVE_1,
@@ -184,6 +195,8 @@ var DisplayMap = map[string]DisplayId{
 	"ROW_2": ROW_2,
 }
 
+// SwitchIdString maps a Switch ID string to a SwitchId. The ID string s
+// is case insensitve.
 func SwitchIdString(s string) (SwitchId, error) {
 	s = strings.ToUpper(s)
 	p, ok := SwitchIdMap[s]
@@ -193,6 +206,8 @@ func SwitchIdString(s string) (SwitchId, error) {
 	return p, nil
 }
 
+// LEDstring maps a LED name to the corresponding LED bits. The string s
+// is case insensitve.
 func LEDString(s string) (byte, error) {
 	s = strings.ToUpper(s)
 	l, ok := LEDMap[s]
@@ -202,6 +217,8 @@ func LEDString(s string) (byte, error) {
 	return l, nil
 }
 
+// DisplayIdString maps a Display name to the DisplayId. The string s
+// is case insesitve.
 func DisplayIdString(s string) (DisplayId, error) {
 	s = strings.ToUpper(s)
 	d, ok := DisplayMap[s]
@@ -211,6 +228,7 @@ func DisplayIdString(s string) (DisplayId, error) {
 	return d, nil
 }
 
+// IsSet returns true if the switch id is set.
 func (switches PanelSwitches) IsSet(id SwitchId) bool {
 	return uint32(switches)&1<<uint32(id) != 0
 }
@@ -242,9 +260,9 @@ func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan Swi
 		for i := SwitchId(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
-				if val == 0 && panel.noZeroSwitch(i) {
-					continue
-				}
+				//if val == 0 && panel.noZeroSwitch(i) {
+				//	continue
+				//}
 				c <- SwitchState{panel.Id(), i, val}
 			}
 		}

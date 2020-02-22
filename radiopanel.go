@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Radio panel switches
 const (
 	COM1_1 SwitchId = iota
 	COM2_1
@@ -39,6 +40,7 @@ const (
 	dash  = 0xef
 )
 
+// Radio panel displays
 const (
 	ACTIVE_1 DisplayId = iota
 	STANDBY_1
@@ -46,11 +48,21 @@ const (
 	STANDBY_2
 )
 
+// Saitek/Logitech radio panel. The panel has:
+//
+// - Two seven position function switches
+//
+// - Two dual rotary encoders
+//
+// - Two momentary push buttons
+//
+// - Four five number segment displays
 type RadioPanel struct {
 	Panel
 	displayState [20]byte
 }
 
+// NewRadioPanel creats a new instance of the radio panel
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
@@ -85,6 +97,8 @@ func NewRadioPanel() (*RadioPanel, error) {
 	return &panel, nil
 }
 
+// Close disconnects the connection to the radio panel and releases all
+// related resources
 func (panel *RadioPanel) Close() {
 	// FIX: Stop threads
 	if panel.intfDone != nil {
@@ -98,6 +112,7 @@ func (panel *RadioPanel) Close() {
 	}
 }
 
+// Id returns RADIO
 func (panel *RadioPanel) Id() PanelId {
 	return panel.id
 }
@@ -110,6 +125,18 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 	return panel.Switches.IsSet(id)
 }
 
+// DisplayString displays the string s on the given display. The string is limited
+// to the numbers 0-9, a dot ',', dash/minus '-' and space, with a length of max
+// five characters.  If any other charachter is
+// used then the underlying previous characther is left intact. This allows you to
+// update different areas of the dislay in sepeate calls. For example:
+//   panel.DisplayString(ACTIVE_1, "12   ")
+//   panel.DisplayString(ACTIVE_1, "** 34")
+//   panel.DisplayString(ACTIVE_1, "** 56")
+// will display the the following sequence on the upper left display:
+//   12
+//   12 34
+//   12 56
 func (panel *RadioPanel) DisplayString(display DisplayId, s string) {
 	if display < ACTIVE_1 || display > STANDBY_2 {
 		return
@@ -159,14 +186,18 @@ func (panel *RadioPanel) DisplayString(display DisplayId, s string) {
 	}
 }
 
+// DisplayInt displays the integer n on the given display
 func (panel *RadioPanel) DisplayInt(display DisplayId, n int) {
 	panel.DisplayString(display, fmt.Sprintf("%d", n))
 }
 
+// DisplayFloat displays the floating point number n with decimals decimals on the
+// given display
 func (panel *RadioPanel) DisplayFloat(display DisplayId, n float64, decimals int) {
 	panel.DisplayString(display, fmt.Sprintf("%.*f", decimals, n))
 }
 
+// DisplayOff turns the display off
 func (panel *RadioPanel) DisplayOff() {
 	panel.displayMutex.Lock()
 	for i := 0; i < len(panel.displayState); i++ {
@@ -189,6 +220,8 @@ func (panel *RadioPanel) refreshDisplay() {
 	}
 }
 
+// WatchSwitches creates a channel for receving SwitchState events
+// whenever the state of a switch changes
 func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 	c := make(chan SwitchState)
 	go readSwitches(panel, panel.inEndpoint, c)
