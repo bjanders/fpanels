@@ -6,9 +6,8 @@
 --
 image:https://travis-ci.com/bjanders/fpanels.svg?branch=master["Build Status", link="https://travis-ci.com/bjanders/fpanels"]
 image:https://goreportcard.com/badge/github.com/bjanders/fpanels["Go Report Card", link="https://goreportcard.com/report/github.com/bjanders/fpanels"]
+image:https://godoc.org/github.com/bjanders/fpanels?status.svg["GoDoc", link="https://godoc.org/github.com/bjanders/fpanels"]
 --
-
-See https://godoc.org/github.com/bjanders/fpanels for godoc documentation.
 
 NOTE: This is work in progress. The code is useable, but not much tested. The API
 is likely to change. The library has only been tested on Linux so far.
