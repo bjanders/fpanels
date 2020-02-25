@@ -2,8 +2,9 @@ package fpanels
 
 import (
 	"fmt"
-	"github.com/google/gousb"
 	"time"
+
+	"github.com/google/gousb"
 )
 
 // Multi panel switches and buttons
@@ -67,7 +68,7 @@ const (
 // - A two row segment display with five numbers on each row. Use DisplayString or DisplayInt to display
 // text on the panels. The displays are identified by the ROW_1 and ROW_2 constants.
 type MultiPanel struct {
-	Panel
+	panel
 	displayState [11]byte
 }
 
@@ -107,7 +108,7 @@ func NewMultiPanel() (*MultiPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
-	panel.Connected = true
+	panel.connected = true
 	return &panel, nil
 }
 
@@ -132,12 +133,12 @@ func (panel *MultiPanel) Id() PanelId {
 }
 
 func (panel *MultiPanel) setSwitches(s PanelSwitches) {
-	panel.Switches = s
+	panel.switches = s
 }
 
 // IsSwitchSet retruns true if SwitchId id is set
 func (panel *MultiPanel) IsSwitchSet(id SwitchId) bool {
-	return panel.Switches.IsSet(id)
+	return panel.switches.IsSet(id)
 }
 
 // LEDs turns on/off the LEDs given by leds. See the LED_* constants.

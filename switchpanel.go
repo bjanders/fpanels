@@ -1,8 +1,9 @@
 package fpanels
 
 import (
-	"github.com/google/gousb"
 	"time"
+
+	"github.com/google/gousb"
 )
 
 // Switch panel switches
@@ -59,7 +60,7 @@ const (
 //
 // - Three red/green landing gear indicator LEDs
 type SwitchPanel struct {
-	Panel
+	panel
 	displayState [1]byte
 }
 
@@ -91,7 +92,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
-	panel.Connected = true
+	panel.connected = true
 	return &panel, nil
 }
 
@@ -116,12 +117,12 @@ func (panel *SwitchPanel) Id() PanelId {
 }
 
 func (panel *SwitchPanel) setSwitches(s PanelSwitches) {
-	panel.Switches = s
+	panel.switches = s
 }
 
 // IsSwitchSet returns true if the switch is set
 func (panel *SwitchPanel) IsSwitchSet(id SwitchId) bool {
-	return panel.Switches.IsSet(id)
+	return panel.switches.IsSet(id)
 }
 
 // LEDs turns on/off the LEDs given by leds. See the LED_* constants.

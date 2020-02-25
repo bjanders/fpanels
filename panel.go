@@ -6,9 +6,10 @@ package fpanels
 
 import (
 	"errors"
-	"github.com/google/gousb"
 	"strings"
 	"sync"
+
+	"github.com/google/gousb"
 )
 
 // USB vendor and product IDs
@@ -33,24 +34,24 @@ const (
 )
 
 // Panel is the base struct for all panels
-type Panel struct {
+type panel struct {
 	ctx          *gousb.Context
 	device       *gousb.Device
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
 	displayMutex sync.Mutex
 	id           PanelId
-	Switches     PanelSwitches
+	switches     PanelSwitches
 	displayDirty bool
 	intfDone     func()
-	Connected    bool
+	connected    bool
 }
 
 // SwitchState contains the state of a switch on a panel
 type SwitchState struct {
 	Panel  PanelId
 	Switch SwitchId
-	Value  uint
+	On     bool
 }
 
 // PanelSwitches is the state of all switches on a panel, one bit per switch
@@ -272,7 +273,7 @@ func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan Swi
 				//if val == 0 && panel.noZeroSwitch(i) {
 				//	continue
 				//}
-				c <- SwitchState{panel.Id(), i, val}
+				c <- SwitchState{panel.Id(), i, val == 1}
 			}
 		}
 	}

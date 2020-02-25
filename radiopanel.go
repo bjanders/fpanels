@@ -2,8 +2,9 @@ package fpanels
 
 import (
 	"fmt"
-	"github.com/google/gousb"
 	"time"
+
+	"github.com/google/gousb"
 )
 
 // Radio panel switches
@@ -58,7 +59,7 @@ const (
 //
 // - Four five number segment displays
 type RadioPanel struct {
-	Panel
+	panel
 	displayState [20]byte
 }
 
@@ -93,7 +94,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 	}
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
-	panel.Connected = true
+	panel.connected = true
 	return &panel, nil
 }
 
@@ -118,12 +119,12 @@ func (panel *RadioPanel) Id() PanelId {
 }
 
 func (panel *RadioPanel) setSwitches(s PanelSwitches) {
-	panel.Switches = s
+	panel.switches = s
 }
 
 // IsSwitchSet returns true if the switch is with ID id is set
 func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
-	return panel.Switches.IsSet(id)
+	return panel.switches.IsSet(id)
 }
 
 // DisplayString displays the string s on the given display. The string is limited
