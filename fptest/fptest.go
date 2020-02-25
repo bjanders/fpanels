@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/bjanders/fpanels"
 	"log"
 	"time"
+
+	"github.com/bjanders/fpanels"
 )
 
 func main() {
@@ -52,9 +53,13 @@ func main() {
 		case switchState = <-switchSwitches:
 			panelName = "switch"
 		}
-		log.Printf("%s: %d: %d", panelName, switchState.Switch, switchState.Value)
+		var state int
+		if switchState.On {
+			state = 1
+		}
+		log.Printf("%s: %d: %d", panelName, switchState.Switch, state)
 		radioPanel.DisplayInt(fpanels.ACTIVE_1, int(switchState.Switch))
-		radioPanel.DisplayInt(fpanels.STANDBY_1, int(switchState.Value))
+		radioPanel.DisplayInt(fpanels.STANDBY_1, state)
 
 	}
 	//      time.Sleep(10 * time.Millisecond)
