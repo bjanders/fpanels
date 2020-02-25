@@ -8,7 +8,7 @@ import (
 
 // Switch panel switches
 const (
-	BAT SwitchId = iota
+	BAT SwitchID = iota
 	ALTERNATOR
 	AVIONICS
 	FUEL
@@ -111,8 +111,8 @@ func (panel *SwitchPanel) Close() {
 	}
 }
 
-// Id returns SWITCH
-func (panel *SwitchPanel) Id() PanelId {
+// ID returns SWITCH
+func (panel *SwitchPanel) ID() PanelID {
 	return panel.id
 }
 
@@ -121,7 +121,7 @@ func (panel *SwitchPanel) setSwitches(s PanelSwitches) {
 }
 
 // IsSwitchSet returns true if the switch is set
-func (panel *SwitchPanel) IsSwitchSet(id SwitchId) bool {
+func (panel *SwitchPanel) IsSwitchSet(id SwitchID) bool {
 	return panel.switches.IsSet(id)
 }
 
@@ -193,7 +193,7 @@ func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *SwitchPanel) noZeroSwitch(s SwitchId) bool {
+func (panel *SwitchPanel) noZeroSwitch(s SwitchID) bool {
 	if s >= ENG_OFF && s <= ENG_START {
 		return true
 	}

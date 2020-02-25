@@ -20,15 +20,15 @@ const (
 	USB_PRODUCT_SWITCH = 0x0d67
 )
 
-// SwitchId identifies a switch on a panel
-type SwitchId uint
+// SwitchID identifies a switch on a panel
+type SwitchID uint
 
-// PanelId identifies the panel type
-type PanelId int
+// PanelID identifies the panel type
+type PanelID int
 
-// PanelIds
+// PanelIDs
 const (
-	RADIO PanelId = iota
+	RADIO PanelID = iota
 	MULTI
 	SWITCH
 )
@@ -40,7 +40,7 @@ type panel struct {
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
 	displayMutex sync.Mutex
-	id           PanelId
+	id           PanelID
 	switches     PanelSwitches
 	displayDirty bool
 	intfDone     func()
@@ -49,28 +49,28 @@ type panel struct {
 
 // SwitchState contains the state of a switch on a panel
 type SwitchState struct {
-	Panel  PanelId
-	Switch SwitchId
+	Panel  PanelID
+	Switch SwitchID
 	On     bool
 }
 
 // PanelSwitches is the state of all switches on a panel, one bit per switch
 type PanelSwitches uint32
 
-// DisplayId identifies a display on a panel
-type DisplayId uint
+// DisplayID identifies a display on a panel
+type DisplayID uint
 
 // SwitchingPanel provides an interface to panels with switches
 type SwitchingPanel interface {
 	setSwitches(s PanelSwitches)
-	noZeroSwitch(i SwitchId) bool
-	Id() PanelId
-	IsSwitchSet(i SwitchId) bool
+	noZeroSwitch(i SwitchID) bool
+	ID() PanelID
+	IsSwitchSet(i SwitchID) bool
 }
 
 // StringDisplayer provides an interface to panels that can display strings
 type StringDisplayer interface {
-	DisplayString(display DisplayId, s string)
+	DisplayString(display DisplayID, s string)
 }
 
 // LEDDisplayer priovides an interface to panels that has LEDs
@@ -81,25 +81,25 @@ type LEDDisplayer interface {
 	LEDsOnOff(leds byte, val float64)
 }
 
-// PanelIdMap maps a panel Id string to a PanelId
-var PanelIdMap = map[string]PanelId{
+// PanelIDMap maps a panel Id string to a PanelID
+var PanelIDMap = map[string]PanelID{
 	"RADIO":  RADIO,
 	"MULTI":  MULTI,
 	"SWITCH": SWITCH,
 }
 
-// PanelIdString maps a panel string to a PanelId. The string s is case insensitive.
-func PanelIdString(s string) (PanelId, error) {
+// PanelIDString maps a panel string to a PanelID. The string s is case insensitive.
+func PanelIDString(s string) (PanelID, error) {
 	s = strings.ToUpper(s)
-	p, ok := PanelIdMap[s]
+	p, ok := PanelIDMap[s]
 	if !ok {
 		return 0, errors.New("Unknown panel type")
 	}
 	return p, nil
 }
 
-// SwitchIdMap maps a switch ID string to a SwitchId
-var SwitchIdMap = map[string]SwitchId{
+// SwitchIDMap maps a switch ID string to a SwitchID
+var SwitchIDMap = map[string]SwitchID{
 	// radio
 	"COM1_1":     COM1_1,
 	"COM2_1":     COM2_1,
@@ -192,8 +192,8 @@ var LEDMap = map[string]byte{
 	"LED_REV": LED_REV,
 }
 
-// DisplayMap maps the display names to a DisplayId
-var DisplayMap = map[string]DisplayId{
+// DisplayMap maps the display names to a DisplayID
+var DisplayMap = map[string]DisplayID{
 	// radio
 	"ACTIVE_1":  ACTIVE_1,
 	"STANDBY_1": STANDBY_1,
@@ -204,11 +204,11 @@ var DisplayMap = map[string]DisplayId{
 	"ROW_2": ROW_2,
 }
 
-// SwitchIdString maps a Switch ID string to a SwitchId. The ID string s
+// SwitchIDString maps a Switch ID string to a SwitchID. The ID string s
 // is case insensitive.
-func SwitchIdString(s string) (SwitchId, error) {
+func SwitchIDString(s string) (SwitchID, error) {
 	s = strings.ToUpper(s)
-	p, ok := SwitchIdMap[s]
+	p, ok := SwitchIDMap[s]
 	if !ok {
 		return 0, errors.New("Unknown switch")
 	}
@@ -226,9 +226,9 @@ func LEDString(s string) (byte, error) {
 	return l, nil
 }
 
-// DisplayIdString maps a Display name to the DisplayId. The string s
+// DisplayIDString maps a Display name to the DisplayID. The string s
 // is case insesitive.
-func DisplayIdString(s string) (DisplayId, error) {
+func DisplayIDString(s string) (DisplayID, error) {
 	s = strings.ToUpper(s)
 	d, ok := DisplayMap[s]
 	if !ok {
@@ -238,12 +238,12 @@ func DisplayIdString(s string) (DisplayId, error) {
 }
 
 // IsSet returns true if the switch id is set.
-func (switches PanelSwitches) IsSet(id SwitchId) bool {
+func (switches PanelSwitches) IsSet(id SwitchID) bool {
 	return uint32(switches)&1<<uint32(id) != 0
 }
 
 // SwitchState returns the statee of the switch with ID id, 0 or 1
-func (switches PanelSwitches) SwitchState(id SwitchId) uint {
+func (switches PanelSwitches) SwitchState(id SwitchID) uint {
 	return uint((uint32(switches) >> uint32(id)) & 1)
 }
 
@@ -267,13 +267,13 @@ func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan Swi
 		changed := state ^ newState
 		state = newState
 		panel.setSwitches(PanelSwitches(state))
-		for i := SwitchId(0); i < 24; i++ {
+		for i := SwitchID(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
 				//if val == 0 && panel.noZeroSwitch(i) {
 				//	continue
 				//}
-				c <- SwitchState{panel.Id(), i, val == 1}
+				c <- SwitchState{panel.ID(), i, val == 1}
 			}
 		}
 	}

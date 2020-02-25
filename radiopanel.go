@@ -9,7 +9,7 @@ import (
 
 // Radio panel switches
 const (
-	COM1_1 SwitchId = iota
+	COM1_1 SwitchID = iota
 	COM2_1
 	NAV1_1
 	NAV2_1
@@ -43,7 +43,7 @@ const (
 
 // Radio panel displays
 const (
-	ACTIVE_1 DisplayId = iota
+	ACTIVE_1 DisplayID = iota
 	STANDBY_1
 	ACTIVE_2
 	STANDBY_2
@@ -113,8 +113,8 @@ func (panel *RadioPanel) Close() {
 	}
 }
 
-// Id returns RADIO
-func (panel *RadioPanel) Id() PanelId {
+// ID returns RADIO
+func (panel *RadioPanel) ID() PanelID {
 	return panel.id
 }
 
@@ -123,7 +123,7 @@ func (panel *RadioPanel) setSwitches(s PanelSwitches) {
 }
 
 // IsSwitchSet returns true if the switch is with ID id is set
-func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
+func (panel *RadioPanel) IsSwitchSet(id SwitchID) bool {
 	return panel.switches.IsSet(id)
 }
 
@@ -139,7 +139,7 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchId) bool {
 //   12
 //   12 34
 //   12 56
-func (panel *RadioPanel) DisplayString(display DisplayId, s string) {
+func (panel *RadioPanel) DisplayString(display DisplayID, s string) {
 	if display < ACTIVE_1 || display > STANDBY_2 {
 		return
 	}
@@ -189,13 +189,13 @@ func (panel *RadioPanel) DisplayString(display DisplayId, s string) {
 }
 
 // DisplayInt displays the integer n on the given display
-func (panel *RadioPanel) DisplayInt(display DisplayId, n int) {
+func (panel *RadioPanel) DisplayInt(display DisplayID, n int) {
 	panel.DisplayString(display, fmt.Sprintf("%d", n))
 }
 
 // DisplayFloat displays the floating point number n with the given number of
 // decimals on the given display
-func (panel *RadioPanel) DisplayFloat(display DisplayId, n float64, decimals int) {
+func (panel *RadioPanel) DisplayFloat(display DisplayID, n float64, decimals int) {
 	panel.DisplayString(display, fmt.Sprintf("%.*f", decimals, n))
 }
 
@@ -230,7 +230,7 @@ func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *RadioPanel) noZeroSwitch(s SwitchId) bool {
+func (panel *RadioPanel) noZeroSwitch(s SwitchID) bool {
 	if s == ACT_1 || s == ACT_2 {
 		return false
 	}

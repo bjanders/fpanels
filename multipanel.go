@@ -9,7 +9,7 @@ import (
 
 // Multi panel switches and buttons
 const (
-	ALT SwitchId = iota
+	ALT SwitchID = iota
 	VS
 	IAS
 	HDG
@@ -47,7 +47,7 @@ const multiDash = 0xde
 
 // Multi panel displays
 const (
-	ROW_1 DisplayId = iota
+	ROW_1 DisplayID = iota
 	ROW_2
 )
 
@@ -127,8 +127,8 @@ func (panel *MultiPanel) Close() {
 	}
 }
 
-// Id returns MULTI
-func (panel *MultiPanel) Id() PanelId {
+// ID returns MULTI
+func (panel *MultiPanel) ID() PanelID {
 	return panel.id
 }
 
@@ -136,8 +136,8 @@ func (panel *MultiPanel) setSwitches(s PanelSwitches) {
 	panel.switches = s
 }
 
-// IsSwitchSet retruns true if SwitchId id is set
-func (panel *MultiPanel) IsSwitchSet(id SwitchId) bool {
+// IsSwitchSet retruns true if SwitchID id is set
+func (panel *MultiPanel) IsSwitchSet(id SwitchID) bool {
 	return panel.switches.IsSet(id)
 }
 
@@ -199,7 +199,7 @@ func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 //   12
 //   12 34
 //   12 56
-func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
+func (panel *MultiPanel) DisplayString(display DisplayID, s string) {
 	if display != ROW_1 && display != ROW_2 {
 		return
 	}
@@ -242,7 +242,7 @@ func (panel *MultiPanel) DisplayString(display DisplayId, s string) {
 }
 
 // DisplayInt will display the integer n on the given display
-func (panel *MultiPanel) DisplayInt(display DisplayId, n int) {
+func (panel *MultiPanel) DisplayInt(display DisplayID, n int) {
 	s := fmt.Sprintf("%d", n)
 	panel.DisplayString(display, s)
 }
@@ -268,7 +268,7 @@ func (panel *MultiPanel) WatchSwitches() chan SwitchState {
 	return c
 }
 
-func (panel *MultiPanel) noZeroSwitch(s SwitchId) bool {
+func (panel *MultiPanel) noZeroSwitch(s SwitchID) bool {
 	if s >= ALT && s <= ENC_CCW {
 		return true
 	}
