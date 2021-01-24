@@ -1,13 +1,11 @@
 = TODO list
 Things to fix and improve
 
-* Add a `DisplayString()` method for the radio and multi panels
-* Fix showing leading zero in the `DisplayInt()` and `DisplayFloat()` methods
-** Maybe convert to string with `Sprintf()` and then call `DisplayString()`
 * End display refresher and switch reader goroutines on panel `Close()`
 ** Use `WaitGroup`
 * Use `sync.Cond` to wake display refresher only when necessary
 * Code documentation
 * Fix according to Go code convention
 ** don't use ALL_CAPS in Go names; use CamelCase
-** Rename all Id to ID
+* Make it work on Windows, see https://github.com/bjanders/fpanels/issues/1
+* Make it work on Mac (currently returns code -3, "bad access")

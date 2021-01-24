@@ -253,7 +253,10 @@ func (panel *MultiPanel) refreshDisplay() {
 		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
 		if panel.displayDirty {
-			panel.device.Control(0x21, 0x09, 0x03, 0x00, panel.displayState[:])
+			// 0x09 is REQUEST_SET_CONFIGURATION
+			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+				0x03, 0x00, panel.displayState[:])
+			// FIX: Check if Control() returns an error and return it somehow or exit
 			panel.displayDirty = false
 		}
 		panel.displayMutex.Unlock()
