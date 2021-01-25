@@ -8,46 +8,46 @@ import (
 
 // Switch panel switches
 const (
-	BAT SwitchID = iota
-	ALTERNATOR
-	AVIONICS
-	FUEL
-	DEICE
-	PITOT
-	COWL
-	PANEL
-	BEACON
-	NAV
-	STROBE
-	TAXI
-	LANDING
-	ENG_OFF
-	ALT_R
-	ALT_L
-	ALT_BOTH
-	ENG_START
-	GEAR_UP
-	GEAR_DOWN
+	SwBat SwitchID = iota
+	SwAlternator
+	SwAvionics
+	SwFuel
+	SwDeice
+	SwPitot
+	SwCowl
+	SwPanel
+	SwBeacon
+	SwNav
+	SwStrobe
+	SwTaxi
+	SwLanding
+	RotOff
+	RotR
+	RotL
+	RotBoth
+	RotStart
+	GearUp
+	GearDown
 )
 
 // Switch panel landing gear lights
 const (
-	N_GREEN byte = 1 << iota
-	L_GREEN
-	R_GREEN
-	N_RED
-	L_RED
-	R_RED
-	N_YELLOW   = N_GREEN | N_RED
-	L_YELLOW   = L_GREEN | L_RED
-	R_YELLOW   = R_GREEN | R_RED
-	ALL_GREEN  = N_GREEN | L_GREEN | R_GREEN
-	ALL_RED    = N_RED | L_RED | R_RED
-	ALL_YELLOW = N_YELLOW | L_YELLOW | R_YELLOW
-	N_ALL      = N_YELLOW
-	L_ALL      = L_YELLOW
-	R_ALL      = R_YELLOW
-	ALL        = ALL_YELLOW
+	LEDNGreen byte = 1 << iota
+	LEDLGreen
+	LEDRGreen
+	LEDNRed
+	LEDLRed
+	LEDRRed
+	LEDNYellow   = LEDNGreen | LEDNRed
+	LEDLYellow   = LEDLGreen | LEDLRed
+	LEDRYellow   = LEDRGreen | LEDRRed
+	LEDAllGreen  = LEDNGreen | LEDLGreen | LEDRGreen
+	LEDAllRed    = LEDNRed | LEDLRed | LEDRRed
+	LEDAllYellow = LEDNYellow | LEDLYellow | LEDRYellow
+	LEDNAll      = LEDNYellow
+	LEDLAll      = LEDLYellow
+	LEDRAll      = LEDRYellow
+	LEDAll       = LEDAllYellow
 )
 
 // SwitchPanel represents a Saitek/Logitech switch panel. The panel has:
@@ -72,7 +72,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	panel.displayState[0] = 0
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
-	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_SWITCH)
+	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductSwitch)
 	if panel.device == nil || err != nil {
 		panel.Close()
 		return nil, err
@@ -197,10 +197,10 @@ func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
 }
 
 func (panel *SwitchPanel) noZeroSwitch(s SwitchID) bool {
-	if s >= ENG_OFF && s <= ENG_START {
+	if s >= RotOff && s <= RotStart {
 		return true
 	}
-	if s == GEAR_UP || s == GEAR_DOWN {
+	if s == GearUp || s == GearDown {
 		return true
 	}
 	return false

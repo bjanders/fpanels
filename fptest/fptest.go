@@ -26,19 +26,19 @@ func main() {
 	defer switchPanel.Close()
 	for i := -1000; i < 1000; i++ {
 		time.Sleep(1000 * time.Microsecond)
-		radioPanel.DisplayInt(fpanels.ACTIVE_1, i)
+		radioPanel.DisplayInt(fpanels.Display1Active, i)
 		s := fmt.Sprintf("%d", i)
-		radioPanel.DisplayString(fpanels.ACTIVE_2, s)
-		multiPanel.DisplayInt(fpanels.ROW_1, i)
+		radioPanel.DisplayString(fpanels.Display2Active, s)
+		multiPanel.DisplayInt(fpanels.Row1, i)
 	}
-	switchPanel.LEDs(fpanels.N_RED | fpanels.L_RED | fpanels.R_GREEN)
+	switchPanel.LEDs(fpanels.LEDNRed | fpanels.LEDLRed | fpanels.LEDRGreen)
 	radioPanel.DisplayOff()
 	time.Sleep(500 * time.Millisecond)
-	switchPanel.LEDsOff(fpanels.N_RED)
+	switchPanel.LEDsOff(fpanels.LEDNRed)
 	time.Sleep(500 * time.Millisecond)
-	switchPanel.LEDsOn(fpanels.N_YELLOW)
+	switchPanel.LEDsOn(fpanels.LEDNYellow)
 	time.Sleep(500 * time.Millisecond)
-	switchPanel.LEDsOff(fpanels.N_ALL)
+	switchPanel.LEDsOff(fpanels.LEDNAll)
 	multiSwitches := multiPanel.WatchSwitches()
 	radioSwitches := radioPanel.WatchSwitches()
 	switchSwitches := switchPanel.WatchSwitches()
@@ -58,8 +58,8 @@ func main() {
 			state = 1
 		}
 		log.Printf("%s: %d: %d", panelName, switchState.Switch, state)
-		radioPanel.DisplayInt(fpanels.ACTIVE_1, int(switchState.Switch))
-		radioPanel.DisplayInt(fpanels.STANDBY_1, state)
+		radioPanel.DisplayInt(fpanels.Display1Active, int(switchState.Switch))
+		radioPanel.DisplayInt(fpanels.Display1Standby, state)
 
 	}
 	//      time.Sleep(10 * time.Millisecond)

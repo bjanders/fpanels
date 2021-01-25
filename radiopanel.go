@@ -9,30 +9,30 @@ import (
 
 // Radio panel switches
 const (
-	COM1_1 SwitchID = iota
-	COM2_1
-	NAV1_1
-	NAV2_1
-	ADF_1
-	DME_1
-	XPDR_1
-	COM1_2
-	COM2_2
-	NAV1_2
-	NAV2_2
-	ADF_2
-	DME_2
-	XPDR_2
-	ACT_1
-	ACT_2
-	ENC1_CW_1
-	ENC1_CCW_1
-	ENC2_CW_1
-	ENC2_CCW_1
-	ENC1_CW_2
-	ENC1_CCW_2
-	ENC2_CW_2
-	ENC2_CCW_2
+	Rot1COM1 SwitchID = iota
+	Rot1COM2
+	Rot1NAV1
+	Rot1NAV2
+	Rot1ADF
+	Rot1DME
+	Rot1XPDR
+	Rot2Com1
+	Rot2Com2
+	Rot2NAV1
+	Rot2NAV2
+	Rot2ADF
+	Rot2DME
+	Rot2XPDR
+	SwAct1
+	SwAct2
+	Enc1CW1
+	Enc1CCW1
+	Enc2CW1
+	Enc2CCW1
+	Enc1CW2
+	Enc1CCW2
+	Enc2CW2
+	Enc2CCW2
 )
 
 const (
@@ -43,10 +43,10 @@ const (
 
 // Radio panel displays
 const (
-	ACTIVE_1 DisplayID = iota
-	STANDBY_1
-	ACTIVE_2
-	STANDBY_2
+	Display1Active DisplayID = iota
+	Display1Standby
+	Display2Active
+	Display2Standby
 )
 
 // RadioPanel represents a Saitek/Logitech radio panel. The panel has:
@@ -73,7 +73,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 	}
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
-	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_RADIO)
+	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductRadio)
 	if panel.device == nil || err != nil {
 		panel.Close()
 		return nil, err
@@ -140,7 +140,7 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchID) bool {
 //   12 34
 //   12 56
 func (panel *RadioPanel) DisplayString(display DisplayID, s string) {
-	if display < ACTIVE_1 || display > STANDBY_2 {
+	if display < Display1Active || display > Display2Standby {
 		return
 	}
 	var d [5]byte
@@ -234,7 +234,7 @@ func (panel *RadioPanel) WatchSwitches() chan SwitchState {
 }
 
 func (panel *RadioPanel) noZeroSwitch(s SwitchID) bool {
-	if s == ACT_1 || s == ACT_2 {
+	if s == SwAct1 || s == SwAct2 {
 		return false
 	}
 	return true

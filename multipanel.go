@@ -9,46 +9,46 @@ import (
 
 // Multi panel switches and buttons
 const (
-	ALT SwitchID = iota
-	VS
-	IAS
-	HDG
-	CRS
-	ENC_CW
-	ENC_CCW
-	BTN_AP
-	BTN_HDG
-	BTN_NAV
-	BTN_IAS
-	BTN_ALT
-	BTN_VS
-	BTN_APR
-	BTN_REV
-	AUTO_THROTTLE
-	FLAPS_UP
-	FLAPS_DOWN
-	TRIM_DOWN
-	TRIM_UP
+	RotALT SwitchID = iota
+	RotVS
+	RotIAS
+	RotHDG
+	RotCRS
+	EncCW
+	EncCCW
+	BtnAP
+	BtnHDG
+	BtnNAV
+	BtnIAS
+	BtnALT
+	BtnVS
+	BtnAPR
+	BtnREV
+	AutoThrottle
+	FlapsUp
+	FlapsDown
+	TrimDown
+	TrimUp
 )
 
 // Multi panel button LED lights
 const (
-	LED_AP byte = 1 << iota
-	LED_HDG
-	LED_NAV
-	LED_IAS
-	LED_ALT
-	LED_VS
-	LED_APR
-	LED_REV
+	LEDAP byte = 1 << iota
+	LEDHDG
+	LEDNAV
+	LEDIAS
+	LEDALT
+	LEDVS
+	LEDAPR
+	LEDREV
 )
 
 const multiDash = 0xde
 
 // Multi panel displays
 const (
-	ROW_1 DisplayID = iota
-	ROW_2
+	Row1 DisplayID = iota
+	Row2
 )
 
 // MultiPanel represents a Saitek/Logitech multi panel. The panel has:
@@ -87,7 +87,7 @@ func NewMultiPanel() (*MultiPanel, error) {
 	}
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
-	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USB_VENDOR_PANEL, USB_PRODUCT_MULTI)
+	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductMulti)
 	if panel.device == nil || err != nil {
 		panel.Close()
 		return nil, err
@@ -200,7 +200,7 @@ func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 //   12 34
 //   12 56
 func (panel *MultiPanel) DisplayString(display DisplayID, s string) {
-	if display != ROW_1 && display != ROW_2 {
+	if display != Row1 && display != Row2 {
 		return
 	}
 
@@ -272,10 +272,10 @@ func (panel *MultiPanel) WatchSwitches() chan SwitchState {
 }
 
 func (panel *MultiPanel) noZeroSwitch(s SwitchID) bool {
-	if s >= ALT && s <= ENC_CCW {
+	if s >= RotALT && s <= EncCCW {
 		return true
 	}
-	if s == TRIM_DOWN || s == TRIM_UP {
+	if s == TrimDown || s == TrimUp {
 		return true
 	}
 	return false

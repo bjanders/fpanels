@@ -5,7 +5,5 @@ Things to fix and improve
 ** Use `WaitGroup`
 * Use `sync.Cond` to wake display refresher only when necessary
 * Code documentation
-* Fix according to Go code convention
-** don't use ALL_CAPS in Go names; use CamelCase
 * Make it work on Windows, see https://github.com/bjanders/fpanels/issues/1
 * Make it work on Mac (currently returns code -3, "bad access")

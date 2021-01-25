@@ -21,35 +21,35 @@ func main() {
 	radioSwitches := radioPanel.WatchSwitches()
 	for i := -500; i < 500; i++ {
 		time.Sleep(1000 * time.Microsecond)
-		radioPanel.DisplayInt(fpanels.ACTIVE_1, i)
+		radioPanel.DisplayInt(fpanels.Display1Active, i)
 		s := fmt.Sprintf("%d.0", i)
-		radioPanel.DisplayString(fpanels.ACTIVE_2, s)
-		radioPanel.DisplayFloat(fpanels.STANDBY_1, float64(i), 2)
-		radioPanel.DisplayInt(fpanels.STANDBY_2, i*1000)
+		radioPanel.DisplayString(fpanels.Display2Active, s)
+		radioPanel.DisplayFloat(fpanels.Display1Standby, float64(i), 2)
+		radioPanel.DisplayInt(fpanels.Display2Standby, i*1000)
 	}
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "")
+	radioPanel.DisplayString(fpanels.Display2Active, "")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "1234567890")
+	radioPanel.DisplayString(fpanels.Display2Active, "1234567890")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, ".")
+	radioPanel.DisplayString(fpanels.Display2Active, ".")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "...")
+	radioPanel.DisplayString(fpanels.Display2Active, "...")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, ".42")
+	radioPanel.DisplayString(fpanels.Display2Active, ".42")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "88.")
+	radioPanel.DisplayString(fpanels.Display2Active, "88.")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "-----")
+	radioPanel.DisplayString(fpanels.Display2Active, "-----")
 	sleep()
-	radioPanel.DisplayString(fpanels.ACTIVE_2, "##0##")
+	radioPanel.DisplayString(fpanels.Display2Active, "##0##")
 	sleep()
 	s := "-----"
 	for i := 0; i < 5; i++ {
 		s = s[:5-i]
-		radioPanel.DisplayString(fpanels.ACTIVE_2, s)
+		radioPanel.DisplayString(fpanels.Display2Active, s)
 		time.Sleep(100 * time.Millisecond)
 	}
-	radioPanel.DisplayString(fpanels.ACTIVE_2, " . . . . .")
+	radioPanel.DisplayString(fpanels.Display2Active, " . . . . .")
 	var switchState fpanels.SwitchState
 	for {
 		switchState = <-radioSwitches
@@ -59,8 +59,8 @@ func main() {
 		}
 
 		log.Printf("%d: %d", switchState.Switch, state)
-		radioPanel.DisplayInt(fpanels.ACTIVE_1, int(switchState.Switch))
-		radioPanel.DisplayInt(fpanels.STANDBY_1, state)
+		radioPanel.DisplayInt(fpanels.Display1Active, int(switchState.Switch))
+		radioPanel.DisplayInt(fpanels.Display1Standby, state)
 
 	}
 }
