@@ -67,7 +67,7 @@ type RadioPanel struct {
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
-	panel.id = RADIO
+	panel.id = Radio
 	for i := range panel.displayState {
 		panel.displayState[i] = blank
 	}
@@ -113,7 +113,7 @@ func (panel *RadioPanel) Close() {
 	}
 }
 
-// ID returns RADIO
+// ID returns Radio
 func (panel *RadioPanel) ID() PanelID {
 	return panel.id
 }
