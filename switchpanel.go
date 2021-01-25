@@ -68,7 +68,7 @@ type SwitchPanel struct {
 func NewSwitchPanel() (*SwitchPanel, error) {
 	var err error
 	panel := SwitchPanel{}
-	panel.id = SWITCH
+	panel.id = Switch
 	panel.displayState[0] = 0
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
@@ -111,7 +111,7 @@ func (panel *SwitchPanel) Close() {
 	}
 }
 
-// ID returns SWITCH
+// ID returns Switch
 func (panel *SwitchPanel) ID() PanelID {
 	return panel.id
 }
@@ -125,9 +125,9 @@ func (panel *SwitchPanel) IsSwitchSet(id SwitchID) bool {
 	return panel.switches.IsSet(id)
 }
 
-// LEDs turns on/off the LEDs given by leds. See the LED_* constants.
+// LEDs turns on/off the LEDs given by leds. See the LED* constants.
 // For example calling
-//   panel.LEDs(L_GREEN | R_GREEN)
+//   panel.LEDs(LEDLGreen | LEDRGreen)
 // will turn on the left and right green landing gear LEDs and turn off
 // all other LEDs
 func (panel *SwitchPanel) LEDs(leds byte) {
@@ -140,7 +140,7 @@ func (panel *SwitchPanel) LEDs(leds byte) {
 // LEDsOn turns on the ELDS given by leds and leaves the other LED states
 // intact. See the switch panel LED constants. Multiple LEDs can be ORed
 // together. For example:
-//  panel.LEDsOn(L_GREEN | R_GREEN)
+//  panel.LEDsOn(LEDLGreen | LEDRGreen)
 func (panel *SwitchPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] | leds
@@ -151,7 +151,7 @@ func (panel *SwitchPanel) LEDsOn(leds byte) {
 // LEDsOff turn off the LEDs given by leds and leaves all other LED states
 // instact. See the switch panel LED constants. Multiple LEDs can be ORed
 // together. For example:
-//   panel.LEDsOff(L_GREEN | R_GREEN)
+//   panel.LEDsOff(LEDLGreen | LEDRGreen)
 func (panel *SwitchPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] & ^leds
@@ -163,7 +163,7 @@ func (panel *SwitchPanel) LEDsOff(leds byte) {
 // the LEDs will be turned off, else they will be turned on. All other
 // LEDs are left intact. See the switch panel LED constants.
 // Multiple LEDs can be ORed togethe, for example:
-//   panel.LEDsOnOff(L_GREEN | R_GREEN, 1)
+//   panel.LEDsOnOff(LEDLGreen | LEDRGreen, 1)
 func (panel *SwitchPanel) LEDsOnOff(leds byte, val float64) {
 	if val > 0 {
 		panel.LEDsOn(leds)
