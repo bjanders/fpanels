@@ -28,9 +28,9 @@ type PanelID int
 
 // PanelIDs
 const (
-	RADIO PanelID = iota
-	MULTI
-	SWITCH
+	Radio PanelID = iota
+	Multi
+	Switch
 )
 
 // Panel is the base struct for all panels
@@ -83,9 +83,9 @@ type LEDDisplayer interface {
 
 // PanelIDMap maps a panel Id string to a PanelID
 var PanelIDMap = map[string]PanelID{
-	"RADIO":  RADIO,
-	"MULTI":  MULTI,
-	"SWITCH": SWITCH,
+	"RADIO":  Radio,
+	"MULTI":  Multi,
+	"SWITCH": Switch,
 }
 
 // PanelIDString maps a panel string to a PanelID. The string s is case insensitive.

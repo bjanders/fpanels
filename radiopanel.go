@@ -67,7 +67,7 @@ type RadioPanel struct {
 func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
-	panel.id = RADIO
+	panel.id = Radio
 	for i := range panel.displayState {
 		panel.displayState[i] = blank
 	}
@@ -113,7 +113,7 @@ func (panel *RadioPanel) Close() {
 	}
 }
 
-// ID returns RADIO
+// ID returns Radio
 func (panel *RadioPanel) ID() PanelID {
 	return panel.id
 }
@@ -132,9 +132,9 @@ func (panel *RadioPanel) IsSwitchSet(id SwitchID) bool {
 // five characters.  If any other character is
 // used then the underlying previous character is left intact. This allows you to
 // update different areas of the dislay in separate calls. For example:
-//   panel.DisplayString(ACTIVE_1, "12   ")
-//   panel.DisplayString(ACTIVE_1, "** 34")
-//   panel.DisplayString(ACTIVE_1, "** 56")
+//   panel.DisplayString(Display1Active, "12   ")
+//   panel.DisplayString(Display1Active, "** 34")
+//   panel.DisplayString(Display1Active, "** 56")
 // will display the the following sequence on the upper left display:
 //   12
 //   12 34

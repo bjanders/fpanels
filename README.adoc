@@ -9,9 +9,9 @@ image:https://goreportcard.com/badge/github.com/bjanders/fpanels["Go Report Card
 image:https://godoc.org/github.com/bjanders/fpanels?status.svg["GoDoc", link="https://godoc.org/github.com/bjanders/fpanels"]
 --
 
-NOTE: This is work in progress. The code is useable, but not much tested. The API
-is likely to change -- at least constants will be changed to use the Go convention. The library has only been verifed to work on Linux so far. https://github.com/bjanders/fpanels/issues/1[It
-does not work on Windows] and I get a "bad access" error code on macOS 11.1.
+NOTE: This is work in progress. The code is useable, but not much tested. The API may
+still change. The library has only been verifed to work on Linux so far. https://github.com/bjanders/fpanels/issues/1[It
+does not fully work on Windows] and I get a "bad access" error code on macOS 11.1.
 
 This library provides code for interfacing with the following Logitech/Saitek
 devices:

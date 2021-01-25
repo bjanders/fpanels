@@ -66,7 +66,7 @@ const (
 // - A pitch trim rotary encoder
 //
 // - A two row segment display with five numbers on each row. Use DisplayString or DisplayInt to display
-// text on the panels. The displays are identified by the ROW_1 and ROW_2 constants.
+// text on the panels. The displays are identified by the Row1 and Row2 constants.
 type MultiPanel struct {
 	panel
 	displayState [11]byte
@@ -76,7 +76,7 @@ type MultiPanel struct {
 func NewMultiPanel() (*MultiPanel, error) {
 	var err error
 	panel := MultiPanel{}
-	panel.id = MULTI
+	panel.id = Multi
 	for i := range panel.displayState {
 		if i == 10 {
 			// 11th byte is the LEDs
@@ -127,7 +127,7 @@ func (panel *MultiPanel) Close() {
 	}
 }
 
-// ID returns MULTI
+// ID returns Multi
 func (panel *MultiPanel) ID() PanelID {
 	return panel.id
 }
@@ -141,9 +141,9 @@ func (panel *MultiPanel) IsSwitchSet(id SwitchID) bool {
 	return panel.switches.IsSet(id)
 }
 
-// LEDs turns on/off the LEDs given by leds. See the LED_* constants.
+// LEDs turns on/off the LEDs given by leds. See the LED* constants.
 // For example calling
-//   panel.LEDs(LED_AP | LED_VS)
+//   panel.LEDs(LEDAP | LEDVS)
 // will turn on the AP and VS LEDs and turn off all other LEDs.
 func (panel *MultiPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
@@ -153,9 +153,9 @@ func (panel *MultiPanel) LEDs(leds byte) {
 }
 
 // LEDsOn turns on the LEDs given by leds and leaves all other LED states
-// intact. See the LED_* constants. Multiple LEDs can be ORed together,
+// intact. See the LED* constants. Multiple LEDs can be ORed together,
 // for example
-//   panel.LEDsOn(LED_AP | LED_VS)
+//   panel.LEDsOn(LEDAP | LEDVS)
 func (panel *MultiPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] | leds
@@ -164,9 +164,9 @@ func (panel *MultiPanel) LEDsOn(leds byte) {
 }
 
 // LEDsOff turns off the LEDs given by leds and leaves all other LED states
-// intact. See the LED_* constants. Multiple LEDs can be ORed together.
+// intact. See the LED* constants. Multiple LEDs can be ORed together.
 // For example
-//   panel.LEDsOff(LED_AP | LED_VS)
+//   panel.LEDsOff(LEDAP | LEDVS)
 func (panel *MultiPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] & ^leds
@@ -176,9 +176,9 @@ func (panel *MultiPanel) LEDsOff(leds byte) {
 
 // LEDsOnOff turns on or off the LEDs given by leds. If val is 0 then
 // the LEDs will be turned offm else they will be turned on. All
-// other LEDs are left intact. See the LED_* constants.
+// other LEDs are left intact. See the LED* constants.
 // Multiple LEDs can be ORed together, for example
-//   panel.LEDsOnOff(LED_AP | LED_VS, 1)
+//   panel.LEDsOnOff(LEDAP | LEDVS, 1)
 func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 	if val > 0 {
 		panel.LEDsOn(leds)
@@ -188,13 +188,13 @@ func (panel *MultiPanel) LEDsOnOff(leds byte, val float64) {
 }
 
 // DisplayString displays the string given by s on the display given by
-// display. The string is limited to the numbers 0-9 and spaces. ROW_2 can
+// display. The string is limited to the numbers 0-9 and spaces. Row2 can
 // additionally show a dash/minus '-'. If any other char is used the
 // underlying previous character is left intact. This allows you to update
 // different areas of the dislay in sepeate calls. For example:
-//   panel.DisplayString(DISPLAY_1, "12   ")
-//   panel.DisplayString(DISPLAY_1, "** 34")
-//   panel.DisplayString(DISPLAY_1, "** 56")
+//   panel.DisplayString(Row1, "12   ")
+//   panel.DisplayString(Row1, "** 34")
+//   panel.DisplayString(Row1, "** 56")
 // will display the the following sequence on the upper display:
 //   12
 //   12 34
