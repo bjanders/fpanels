@@ -69,7 +69,7 @@ const (
 // text on the panels. The displays are identified by the Row1 and Row2 constants.
 type MultiPanel struct {
 	panel
-	displayState [11]byte
+	displayState [12]byte
 }
 
 // NewMultiPanel creates a new instances of the Logitech/Saitek multipanel
@@ -78,13 +78,10 @@ func NewMultiPanel() (*MultiPanel, error) {
 	panel := MultiPanel{}
 	panel.id = Multi
 	for i := range panel.displayState {
-		if i == 10 {
-			// 11th byte is the LEDs
-			panel.displayState[i] = 0x00
-		} else {
-			panel.displayState[i] = blank
-		}
+		panel.displayState[i] = blank
 	}
+	panel.displayState[10] = 0x00
+	panel.displayState[11] = 0xff
 	panel.displayDirty = true
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductMulti)
@@ -255,7 +252,7 @@ func (panel *MultiPanel) refreshDisplay() {
 		if panel.displayDirty {
 			// 0x09 is REQUEST_SET_CONFIGURATION
 			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x03, 0x00, panel.displayState[:])
+				0x0300, 0x00, panel.displayState[:])
 			// FIX: Check if Control() returns an error and return it somehow or exit
 			panel.displayDirty = false
 		}

@@ -31,6 +31,10 @@ func main() {
 		radioPanel.DisplayString(fpanels.Display2Active, s)
 		multiPanel.DisplayInt(fpanels.Row1, i)
 	}
+	for i := byte(0x01); i <= 0x40; i = i << 1 {
+		multiPanel.LEDsOn(i)
+		time.Sleep(500 * time.Millisecond)
+	}
 	switchPanel.LEDs(fpanels.LEDNRed | fpanels.LEDLRed | fpanels.LEDRGreen)
 	radioPanel.DisplayOff()
 	time.Sleep(500 * time.Millisecond)

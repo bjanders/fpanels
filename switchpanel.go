@@ -1,6 +1,7 @@
 package fpanels
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/gousb"
@@ -179,8 +180,11 @@ func (panel *SwitchPanel) refreshDisplay() {
 		panel.displayMutex.Lock()
 		if panel.displayDirty {
 			// 0x09 is REQUEST_SET_CONFIGURATION
-			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x03, 0x00, panel.displayState[:])
+			_, err := panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+				0x0300, 0x01, panel.displayState[:])
+			if err != nil {
+				log.Print(err)
+			}
 			// FIX: Check if Control() returns an error and return it somehow or exit
 			panel.displayDirty = false
 		}

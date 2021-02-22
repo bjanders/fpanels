@@ -60,7 +60,7 @@ const (
 // - Four five number segment displays
 type RadioPanel struct {
 	panel
-	displayState [20]byte
+	displayState [22]byte
 }
 
 // NewRadioPanel creats a new instance of the radio panel
@@ -92,6 +92,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 		panel.Close()
 		return nil, err
 	}
+
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
 	panel.connected = true
@@ -217,7 +218,7 @@ func (panel *RadioPanel) refreshDisplay() {
 		if panel.displayDirty {
 			// 0x09 is REQUEST_SET_CONFIGURATION
 			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x03, 0x00, panel.displayState[:])
+				0x0300, 0x00, panel.displayState[:])
 			// FIX: Check if Control() returns an error and return it somehow or exit
 			panel.displayDirty = false
 		}
