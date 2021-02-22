@@ -10,8 +10,9 @@ image:https://godoc.org/github.com/bjanders/fpanels?status.svg["GoDoc", link="ht
 --
 
 NOTE: This is work in progress. The code is useable, but not much tested. The API may
-still change. The library has only been verifed to work on Linux so far. https://github.com/bjanders/fpanels/issues/1[It
-does not fully work on Windows] and I get a "bad access" error code on macOS 11.1.
+still change. The library has been verified to work on Linux and Windows so far. There
+is however https://github.com/bjanders/fpanels/issues/2[some issue with the multi panel
+display on Windows] and I get a "bad access" error code on macOS 11.1.
 
 This library provides code for interfacing with the following Logitech/Saitek
 devices:
@@ -193,7 +194,7 @@ The vendor:prduct ID for the panel is 06a3:0d05.
 
 ==== Segment displays
 
-The segment displays are controlled by sending a 20 byte USB
+The segment displays are controlled by sending a 22 byte USB
 control message to the device, 5 bytes per display, in the following order:
 top left, top right, bottom left, bottom right.
 
@@ -205,6 +206,9 @@ The 20 display numbers are encoded as follows:
 1101xxxx Adds a dot to the number
 1110xxxx Shows dash/minus
 ----
+
+Two additional bytes have to be sent for it to work on Windows, i.e, 22 bytes
+in total. These remaining two bytes can be sent as zero.
 
 ==== Switches, buttons and encoders
 
