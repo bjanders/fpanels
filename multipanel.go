@@ -202,6 +202,20 @@ func (panel *MultiPanel) DisplayString(display DisplayID, s string) {
 	}
 
 	var d [5]byte
+	charmap := map[rune]byte{
+		'0': 0,
+		'1': 1,
+		'2': 2,
+		'3': 3,
+		'4': 4,
+		'5': 5,
+		'6': 6,
+		'7': 7,
+		'8': 8,
+		'9': 9,
+		' ': blank,
+		'-': multiDash,
+	}
 	displayStart := int(display) * 5
 	disp := panel.displayState[displayStart : displayStart+5]
 	dIdx := 0
@@ -209,14 +223,10 @@ func (panel *MultiPanel) DisplayString(display DisplayID, s string) {
 		if dIdx > 4 {
 			break
 		}
-		switch c {
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			d[dIdx] = byte(c - '0')
-		case ' ':
-			d[dIdx] = blank
-		case '-':
-			d[dIdx] = multiDash
-		default:
+		char, ok := charmap[c]
+		if ok {
+			d[dIdx] = char
+		} else {
 			// leave current char as is
 			d[dIdx] = disp[dIdx]
 		}

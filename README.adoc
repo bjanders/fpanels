@@ -10,9 +10,8 @@ image:https://godoc.org/github.com/bjanders/fpanels?status.svg["GoDoc", link="ht
 --
 
 NOTE: This is work in progress. The code is useable, but not much tested. The API may
-still change. The library has been verified to work on Linux and Windows so far. There
-is however https://github.com/bjanders/fpanels/issues/2[some issue with the multi panel
-display on Windows] and I get a "bad access" error code on macOS 11.1.
+still change. The library has been verified to work on Linux and Windows. On macOS 11.1 
+I get a "bad access" error code.
 
 This library provides code for interfacing with the following Logitech/Saitek
 devices:
