@@ -40,6 +40,7 @@ type panel struct {
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
 	displayMutex sync.Mutex
+	displayCond  *sync.Cond
 	id           PanelID
 	switches     PanelSwitches
 	displayDirty bool

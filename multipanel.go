@@ -2,7 +2,7 @@ package fpanels
 
 import (
 	"fmt"
-	"time"
+	"sync"
 
 	"github.com/google/gousb"
 )
@@ -83,6 +83,7 @@ func NewMultiPanel() (*MultiPanel, error) {
 	panel.displayState[10] = 0x00
 	panel.displayState[11] = 0xff
 	panel.displayDirty = true
+	panel.displayCond = sync.NewCond(&panel.displayMutex)
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductMulti)
 	if panel.device == nil || err != nil {
@@ -146,6 +147,7 @@ func (panel *MultiPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -157,6 +159,7 @@ func (panel *MultiPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] | leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -168,6 +171,7 @@ func (panel *MultiPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[10] = panel.displayState[10] & ^leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -236,6 +240,7 @@ func (panel *MultiPanel) DisplayString(display DisplayID, s string) {
 	panel.displayMutex.Lock()
 	defer panel.displayMutex.Unlock()
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	dIdx--
 	// align right and fill with blanks
 	for i := 4; i >= 0; i-- {
@@ -256,16 +261,18 @@ func (panel *MultiPanel) DisplayInt(display DisplayID, n int) {
 
 func (panel *MultiPanel) refreshDisplay() {
 	for {
-		// refresh rate 20 Hz
-		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
-		if panel.displayDirty {
-			// 0x09 is REQUEST_SET_CONFIGURATION
-			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x0300, 0x00, panel.displayState[:])
-			// FIX: Check if Control() returns an error and return it somehow or exit
-			panel.displayDirty = false
+		for !panel.displayDirty {
+			panel.displayCond.Wait()
 		}
+		// 0x09 is REQUEST_SET_CONFIGURATION
+		// 0x0300 is:
+		// 	 0x03 HID_REPORT_TYPE_FEATURE
+		//   0x00 Report ID 0
+		panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+			0x0300, 0x00, panel.displayState[:])
+		// FIX: Check if Control() returns an error and return it somehow or exit
+		panel.displayDirty = false
 		panel.displayMutex.Unlock()
 	}
 }

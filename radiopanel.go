@@ -2,7 +2,7 @@ package fpanels
 
 import (
 	"fmt"
-	"time"
+	"sync"
 
 	"github.com/google/gousb"
 )
@@ -72,6 +72,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 		panel.displayState[i] = blank
 	}
 	panel.displayDirty = true
+	panel.displayCond = sync.NewCond(&panel.displayMutex)
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductRadio)
 	if panel.device == nil || err != nil {
@@ -177,6 +178,7 @@ func (panel *RadioPanel) DisplayString(display DisplayID, s string) {
 	panel.displayMutex.Lock()
 	defer panel.displayMutex.Unlock()
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	dIdx--
 	// align right and fill with blanks
 	for i := 4; i >= 0; i-- {
@@ -207,21 +209,24 @@ func (panel *RadioPanel) DisplayOff() {
 		panel.displayState[i] = 0xff
 	}
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 
 }
 func (panel *RadioPanel) refreshDisplay() {
 	for {
-		// refresh rate 20 Hz
-		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
-		if panel.displayDirty {
-			// 0x09 is REQUEST_SET_CONFIGURATION
-			panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x0300, 0x00, panel.displayState[:])
-			// FIX: Check if Control() returns an error and return it somehow or exit
-			panel.displayDirty = false
+		for !panel.displayDirty {
+			panel.displayCond.Wait()
 		}
+		// 0x09 is REQUEST_SET_CONFIGURATION
+		// 0x0300 is:
+		// 	 0x03 HID_REPORT_TYPE_FEATURE
+		//   0x00 Report ID 0
+		panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+			0x0300, 0x00, panel.displayState[:])
+		// FIX: Check if Control() returns an error and return it somehow or exit
+		panel.displayDirty = false
 		panel.displayMutex.Unlock()
 	}
 }

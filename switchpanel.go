@@ -1,8 +1,7 @@
 package fpanels
 
 import (
-	"log"
-	"time"
+	"sync"
 
 	"github.com/google/gousb"
 )
@@ -72,6 +71,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	panel.id = Switch
 	panel.displayState[0] = 0
 	panel.displayDirty = true
+	panel.displayCond = sync.NewCond(&panel.displayMutex)
 	panel.ctx = gousb.NewContext()
 	panel.device, err = panel.ctx.OpenDeviceWithVIDPID(USBVendorPanel, USBProductSwitch)
 	if panel.device == nil || err != nil {
@@ -135,6 +135,7 @@ func (panel *SwitchPanel) LEDs(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -146,6 +147,7 @@ func (panel *SwitchPanel) LEDsOn(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] | leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -157,6 +159,7 @@ func (panel *SwitchPanel) LEDsOff(leds byte) {
 	panel.displayMutex.Lock()
 	panel.displayState[0] = panel.displayState[0] & ^leds
 	panel.displayDirty = true
+	panel.displayCond.Signal()
 	panel.displayMutex.Unlock()
 }
 
@@ -175,19 +178,18 @@ func (panel *SwitchPanel) LEDsOnOff(leds byte, val float64) {
 
 func (panel *SwitchPanel) refreshDisplay() {
 	for {
-		// refresh rate 20 Hz
-		time.Sleep(50 * time.Millisecond)
 		panel.displayMutex.Lock()
-		if panel.displayDirty {
-			// 0x09 is REQUEST_SET_CONFIGURATION
-			_, err := panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-				0x0300, 0x01, panel.displayState[:])
-			if err != nil {
-				log.Print(err)
-			}
-			// FIX: Check if Control() returns an error and return it somehow or exit
-			panel.displayDirty = false
+		for !panel.displayDirty {
+			panel.displayCond.Wait()
 		}
+		// 0x09 is REQUEST_SET_CONFIGURATION
+		// 0x0300 is:
+		// 	 0x03 HID_REPORT_TYPE_FEATURE
+		//   0x00 Report ID 0
+		panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+			0x0300, 0x00, panel.displayState[:])
+		// FIX: Check if Control() returns an error and return it somehow or exit
+		panel.displayDirty = false
 		panel.displayMutex.Unlock()
 	}
 }

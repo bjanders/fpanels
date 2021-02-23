@@ -3,7 +3,6 @@ Things to fix and improve
 
 * End display refresher and switch reader goroutines on panel `Close()`
 ** Use `WaitGroup`
-* Use `sync.Cond` to wake display refresher only when necessary
 * Code documentation
-* Make it work on Windows, see https://github.com/bjanders/fpanels/issues/1
-* Make it work on Mac (currently returns code -3, "bad access")
+* Make it work on macOS (currently returns code -3, "bad access")
+  This is probably because a kernel extension attaches to it, excluding other use
