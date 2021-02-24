@@ -60,7 +60,6 @@ const (
 // - Four five number segment displays
 type RadioPanel struct {
 	panel
-	displayState [22]byte
 }
 
 // NewRadioPanel creats a new instance of the radio panel
@@ -68,6 +67,7 @@ func NewRadioPanel() (*RadioPanel, error) {
 	var err error
 	panel := RadioPanel{}
 	panel.id = Radio
+	panel.displayState = make([]byte, 22)
 	for i := range panel.displayState {
 		panel.displayState[i] = blank
 	}
@@ -94,39 +94,13 @@ func NewRadioPanel() (*RadioPanel, error) {
 		return nil, err
 	}
 
+	panel.switchCh = make(chan SwitchState)
+	go panel.readSwitches()
+
 	// FIX: Add WaitGroup
 	go panel.refreshDisplay()
 	panel.connected = true
 	return &panel, nil
-}
-
-// Close disconnects the connection to the radio panel and releases all
-// related resources
-func (panel *RadioPanel) Close() {
-	// FIX: Stop threads
-	if panel.intfDone != nil {
-		panel.intfDone()
-	}
-	if panel.device != nil {
-		panel.device.Close()
-	}
-	if panel.ctx != nil {
-		panel.ctx.Close()
-	}
-}
-
-// ID returns Radio
-func (panel *RadioPanel) ID() PanelID {
-	return panel.id
-}
-
-func (panel *RadioPanel) setSwitches(s PanelSwitches) {
-	panel.switches = s
-}
-
-// IsSwitchSet returns true if the switch is with ID id is set
-func (panel *RadioPanel) IsSwitchSet(id SwitchID) bool {
-	return panel.switches.IsSet(id)
 }
 
 // DisplayString displays the string s on the given display. The string is limited
@@ -229,14 +203,6 @@ func (panel *RadioPanel) refreshDisplay() {
 		panel.displayDirty = false
 		panel.displayMutex.Unlock()
 	}
-}
-
-// WatchSwitches creates a channel for receiving SwitchState events
-// whenever the state of a switch changes
-func (panel *RadioPanel) WatchSwitches() chan SwitchState {
-	c := make(chan SwitchState)
-	go readSwitches(panel, panel.inEndpoint, c)
-	return c
 }
 
 func (panel *RadioPanel) noZeroSwitch(s SwitchID) bool {

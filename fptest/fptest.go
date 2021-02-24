@@ -45,9 +45,9 @@ func main() {
 	switchPanel.LEDsOn(fpanels.LEDNYellow)
 	time.Sleep(500 * time.Millisecond)
 	switchPanel.LEDsOff(fpanels.LEDNAll)
-	multiSwitches := multiPanel.WatchSwitches()
-	radioSwitches := radioPanel.WatchSwitches()
-	switchSwitches := switchPanel.WatchSwitches()
+	multiSwitches := multiPanel.SwitchCh()
+	radioSwitches := radioPanel.SwitchCh()
+	switchSwitches := switchPanel.SwitchCh()
 	var switchState fpanels.SwitchState
 	var panelName string
 	for {

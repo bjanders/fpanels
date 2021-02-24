@@ -61,7 +61,6 @@ const (
 // - Three red/green landing gear indicator LEDs
 type SwitchPanel struct {
 	panel
-	displayState [1]byte
 }
 
 // NewSwitchPanel create a new instance of the Logitech/Saitek switch panel
@@ -69,6 +68,7 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 	var err error
 	panel := SwitchPanel{}
 	panel.id = Switch
+	panel.displayState = make([]byte, 1)
 	panel.displayState[0] = 0
 	panel.displayDirty = true
 	panel.displayCond = sync.NewCond(&panel.displayMutex)
@@ -92,38 +92,11 @@ func NewSwitchPanel() (*SwitchPanel, error) {
 		return nil, err
 	}
 	// FIX: Add WaitGroup
+	panel.switchCh = make(chan SwitchState)
+	go panel.readSwitches()
 	go panel.refreshDisplay()
 	panel.connected = true
 	return &panel, nil
-}
-
-// Close disconnects the connection to the switch panel and releases all
-// related resources
-func (panel *SwitchPanel) Close() {
-	// FIX: Stop threads
-	if panel.intfDone != nil {
-		panel.intfDone()
-	}
-	if panel.device != nil {
-		panel.device.Close()
-	}
-	if panel.ctx != nil {
-		panel.ctx.Close()
-	}
-}
-
-// ID returns Switch
-func (panel *SwitchPanel) ID() PanelID {
-	return panel.id
-}
-
-func (panel *SwitchPanel) setSwitches(s PanelSwitches) {
-	panel.switches = s
-}
-
-// IsSwitchSet returns true if the switch is set
-func (panel *SwitchPanel) IsSwitchSet(id SwitchID) bool {
-	return panel.switches.IsSet(id)
 }
 
 // LEDs turns on/off the LEDs given by leds. See the LED* constants.
@@ -174,32 +147,6 @@ func (panel *SwitchPanel) LEDsOnOff(leds byte, val float64) {
 	} else {
 		panel.LEDsOff(leds)
 	}
-}
-
-func (panel *SwitchPanel) refreshDisplay() {
-	for {
-		panel.displayMutex.Lock()
-		for !panel.displayDirty {
-			panel.displayCond.Wait()
-		}
-		// 0x09 is REQUEST_SET_CONFIGURATION
-		// 0x0300 is:
-		// 	 0x03 HID_REPORT_TYPE_FEATURE
-		//   0x00 Report ID 0
-		panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
-			0x0300, 0x00, panel.displayState[:])
-		// FIX: Check if Control() returns an error and return it somehow or exit
-		panel.displayDirty = false
-		panel.displayMutex.Unlock()
-	}
-}
-
-// WatchSwitches creates a channel for reeiving SwitchState events
-// whenever the state of a swtich changes.
-func (panel *SwitchPanel) WatchSwitches() chan SwitchState {
-	c := make(chan SwitchState)
-	go readSwitches(panel, panel.inEndpoint, c)
-	return c
 }
 
 func (panel *SwitchPanel) noZeroSwitch(s SwitchID) bool {

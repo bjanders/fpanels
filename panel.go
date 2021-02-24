@@ -39,6 +39,7 @@ type panel struct {
 	device       *gousb.Device
 	intf         *gousb.Interface
 	inEndpoint   *gousb.InEndpoint
+	displayState []byte
 	displayMutex sync.Mutex
 	displayCond  *sync.Cond
 	id           PanelID
@@ -46,6 +47,9 @@ type panel struct {
 	displayDirty bool
 	intfDone     func()
 	connected    bool
+	quit         bool
+	wg           sync.WaitGroup
+	switchCh     chan SwitchState
 }
 
 // SwitchState contains the state of a switch on a panel
@@ -60,14 +64,6 @@ type PanelSwitches uint32
 
 // DisplayID identifies a display on a panel
 type DisplayID uint
-
-// SwitchingPanel provides an interface to panels with switches
-type SwitchingPanel interface {
-	setSwitches(s PanelSwitches)
-	noZeroSwitch(i SwitchID) bool
-	ID() PanelID
-	IsSwitchSet(i SwitchID) bool
-}
 
 // StringDisplayer provides an interface to panels that can display strings
 type StringDisplayer interface {
@@ -248,12 +244,12 @@ func (switches PanelSwitches) SwitchState(id SwitchID) uint {
 	return uint((uint32(switches) >> uint32(id)) & 1)
 }
 
-func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan SwitchState) error {
+func (panel *panel) readSwitches() error {
 	var data [3]byte
 	var state uint32
 	var newState uint32
 
-	stream, err := inEndpoint.NewStream(3, 1)
+	stream, err := panel.inEndpoint.NewStream(3, 1)
 	if err != nil {
 		return err
 	}
@@ -267,15 +263,68 @@ func readSwitches(panel SwitchingPanel, inEndpoint *gousb.InEndpoint, c chan Swi
 		newState = uint32(data[0]) | uint32(data[1])<<8 | uint32(data[2])<<16
 		changed := state ^ newState
 		state = newState
-		panel.setSwitches(PanelSwitches(state))
+		panel.switches = PanelSwitches(state)
 		for i := SwitchID(0); i < 24; i++ {
 			if (changed>>i)&1 == 1 {
 				val := uint(state >> i & 1)
 				//if val == 0 && panel.noZeroSwitch(i) {
 				//	continue
 				//}
-				c <- SwitchState{panel.ID(), i, val == 1}
+				select {
+				case panel.switchCh <- SwitchState{panel.ID(), i, val == 1}:
+				default:
+				}
 			}
 		}
 	}
+}
+
+func (panel *panel) Close() {
+	panel.displayMutex.Lock()
+	panel.quit = true
+	panel.displayMutex.Unlock()
+
+	// FIX: Stop threads
+	if panel.intfDone != nil {
+		panel.intfDone()
+	}
+	if panel.device != nil {
+		panel.device.Close()
+	}
+	if panel.ctx != nil {
+		panel.ctx.Close()
+	}
+}
+
+func (panel *panel) IsSwitchSet(id SwitchID) bool {
+	return panel.switches.IsSet(id)
+}
+
+func (panel *panel) ID() PanelID {
+	return panel.id
+}
+
+func (panel *panel) refreshDisplay() {
+	tmpBuf := make([]byte, len(panel.displayState))
+	for {
+		panel.displayMutex.Lock()
+		for !panel.displayDirty {
+			panel.displayCond.Wait()
+		}
+		// 0x09 is REQUEST_SET_CONFIGURATION
+		// 0x0300 is:
+		// 	 0x03 HID_REPORT_TYPE_FEATURE
+		//   0x00 Report ID 0
+		copy(tmpBuf, panel.displayState)
+		panel.displayDirty = false
+		panel.displayMutex.Unlock()
+		panel.device.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, 0x09,
+			0x0300, 0x00, tmpBuf)
+		// FIX: Check if Control() returns an error and return it somehow or exit
+	}
+}
+
+// SwitchCh returns a channel for switch events
+func (panel *panel) SwitchCh() chan SwitchState {
+	return panel.switchCh
 }

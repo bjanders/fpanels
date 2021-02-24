@@ -18,7 +18,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 	defer radioPanel.Close()
-	radioSwitches := radioPanel.WatchSwitches()
+	radioSwitches := radioPanel.SwitchCh()
 	for i := -500; i < 500; i++ {
 		time.Sleep(1000 * time.Microsecond)
 		radioPanel.DisplayInt(fpanels.Display1Active, i)
